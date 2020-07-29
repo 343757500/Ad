@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerInParent="true"
+    android:orientation="vertical">
+    <ImageView
+        android:id="@+id/iv_ad_img"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="visible"/>
+    <FrameLayout
+        android:id="@+id/fl_video"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone">
+        <com.lvchuan.ad.view.MyStandardGSYVideoPlayer
+            android:id="@+id/svplayer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></com.lvchuan.ad.view.MyStandardGSYVideoPlayer>
+
+        <ImageView
+            android:id="@+id/coverView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            />
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/loadingView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="@dimen/dp_15"
+            android:background="@android:color/holo_orange_dark">
+            <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="100dp"
+                android:indeterminateTint="#ffffff"
+                android:layout_height="100dp"/>
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

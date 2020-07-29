@@ -1,0 +1,79 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.lvchuan.ad"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+            assets.srcDirs = ['src/main/assets', 'src/main/assets/']
+            jni.srcDirs = []
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    repositories {
+        flatDir { dirs 'libs' }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    implementation files('libs\\pldroid-player-2.1.8.jar')
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.46.Final'
+    implementation group: 'com.alibaba', name: 'fastjson', version: '1.2.68'
+    // AndroidEventBus
+    implementation 'org.simple:androideventbus:1.0.5.1'
+
+    implementation 'com.bigkoo:ConvenientBanner:2.1.4'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    //noinspection GradleDynamicVersion,GradleCompatible
+    implementation 'com.android.support:recyclerview-v7:29+'
+
+    //webview
+    implementation 'com.just.agentweb:agentweb:4.1.3' // (必选)
+    // OkGo网络请求   https://github.com/jeasonlzy/okhttp-OkGo/wiki
+    implementation 'com.lzy.net:okgo:3.0.4'
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
+
+    //完整版引入
+    implementation 'com.shuyu:GSYVideoPlayer:7.1.4'
+
+    implementation 'com.android.support:multidex:1.0.3'
+
+    implementation 'com.liulishuo.filedownloader:library:1.6.4'//最新版本见github
+
+}
