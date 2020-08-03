@@ -76,4 +76,11 @@ dependencies {
 
     implementation 'com.liulishuo.filedownloader:library:1.6.4'//最新版本见github
 
+    implementation 'com.github.razerdp:AnimatedPieView:1.2.6'
+
+    // 图片请求picasso
+    implementation 'com.squareup.picasso:picasso:2.3.2'
+
+    implementation 'me.jessyan:autosize:1.1.2'
+
 }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/ll"
+    android:onClick="onClick"
+    android:background="@android:color/black"
+    tools:context=".MainActivity">
+
+
+    <Button
+        android:visibility="gone"
+        android:id="@+id/bt_1"
+        android:onClick="onClick"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="MissingConstraints"></Button>
+
+    <Button
+        android:visibility="gone"
+        android:id="@+id/bt_2"
+        android:onClick="onClick"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="MissingConstraints"></Button>
+
+
+    <com.bigkoo.convenientbanner.ConvenientBanner
+        android:id="@+id/adBanner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        app:canLoop="true" />
+
+
+    <LinearLayout
+        android:visibility="visible"
+        android:background="@color/colorAccent"
+        android:id="@+id/lin_web"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+    </LinearLayout>
+
+
+</LinearLayout>

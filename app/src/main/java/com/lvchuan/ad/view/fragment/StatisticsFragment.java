@@ -1,27 +1,18 @@
-package com.lvchuan.ad;
+package com.lvchuan.ad.view.fragment;
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.media.session.MediaController;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.TextView;
 
-
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.lvchuan.ad.R;
+import com.lvchuan.ad.base.BaseFragment;
 import com.lvchuan.ad.view.adapter.DailyRecoveryAdapter;
-import com.lvchuan.ad.view.adapter.DailyRecoveryNullAdapter;
 import com.razerdp.widget.animatedpieview.AnimatedPieView;
 import com.razerdp.widget.animatedpieview.AnimatedPieViewConfig;
 import com.razerdp.widget.animatedpieview.data.SimplePieInfo;
-import com.shuyu.gsyvideoplayer.listener.VideoAllCallBack;
-
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 
 import java.text.SimpleDateFormat;
@@ -29,19 +20,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
-public class DemoActivity extends Activity {
+public class StatisticsFragment extends BaseFragment {
 
     private StandardGSYVideoPlayer svp;
     private RecyclerView rv;
     private List<String> list = new ArrayList();
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);//隐藏状态栏
+    public int getLayoutRes() {
+        return R.layout.fragment_statistics;
+    }
 
-        setContentView(R.layout.activity_demo);
+    @Override
+    public void initView() {
 
 
         list.add("纸类");
@@ -49,10 +40,10 @@ public class DemoActivity extends Activity {
         list.add("饮料瓶");
         list.add("织物类");
 
-        TextView time1 = findViewById(R.id.time1);
-        rv = findViewById(R.id.rv);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        DailyRecoveryAdapter dailyRecoveryAdapter = new DailyRecoveryAdapter(this, null);
+        TextView time1 = findView(R.id.time1);
+        rv = findView(R.id.rv);
+        rv.setLayoutManager(new LinearLayoutManager(getActivity()));
+        DailyRecoveryAdapter dailyRecoveryAdapter = new DailyRecoveryAdapter(getActivity(), null);
         rv.setAdapter(dailyRecoveryAdapter);
         dailyRecoveryAdapter.setDatas(list);
 
@@ -63,13 +54,13 @@ public class DemoActivity extends Activity {
         dailyRecoveryAdapter2.setDatas(list);*/
 
 
-        AnimatedPieView mAnimatedPieView = findViewById(R.id.animatedPieView);
+        AnimatedPieView mAnimatedPieView = findView(R.id.animatedPieView);
         AnimatedPieViewConfig config = new AnimatedPieViewConfig();
         config.startAngle(-90)// 起始角度偏移
-                .addData(new SimplePieInfo(27.66, ContextCompat.getColor(this,R.color.bg1), "这是第一段"))//数据（实现IPieInfo接口的bean）
-                .addData(new SimplePieInfo(7.53, ContextCompat.getColor(this,R.color.bg2), "这是第二段"))
-                .addData(new SimplePieInfo(24.36,ContextCompat.getColor(this,R.color.bg3), "这是第二段"))
-                .addData(new SimplePieInfo(40.45, ContextCompat.getColor(this,R.color.bg4), "这是第二段"))
+                .addData(new SimplePieInfo(27.66, ContextCompat.getColor(getActivity(),R.color.bg1), "这是第一段"))//数据（实现IPieInfo接口的bean）
+                .addData(new SimplePieInfo(7.53, ContextCompat.getColor(getActivity(),R.color.bg2), "这是第二段"))
+                .addData(new SimplePieInfo(24.36,ContextCompat.getColor(getActivity(),R.color.bg3), "这是第二段"))
+                .addData(new SimplePieInfo(40.45, ContextCompat.getColor(getActivity(),R.color.bg4), "这是第二段"))
                 // ...(尽管addData吧)
                 .duration(2000)
                 .strokeMode(false)
@@ -86,6 +77,20 @@ public class DemoActivity extends Activity {
         Date date = new Date(System.currentTimeMillis());
         SimpleDateFormat  format=new SimpleDateFormat("EEEE");
         time1.setText(simpleDateFormat.format(date)+"  "+format.format(date));
+    }
+
+    @Override
+    public void initListener() {
+
+    }
+
+    @Override
+    public void initData() {
+
+    }
+
+    @Override
+    public void onClick(View v, int id) {
 
     }
 }

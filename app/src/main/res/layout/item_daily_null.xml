@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:visibility="invisible"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:visibility="invisible"
+        android:layout_weight="1"
+        android:src="@mipmap/icon1"
+        android:layout_width="0dp"
+        android:layout_height="44dp"></ImageView>
+
+    <TextView
+    android:text="品类"
+        android:visibility="invisible"
+        android:textColor="@color/white"
+        android:id="@+id/tv_category"
+        android:gravity="center"
+        android:layout_weight="2"
+    android:layout_width="0dp"
+    android:layout_height="44dp"></TextView>
+
+    <TextView
+        android:visibility="invisible"
+        android:text="数量"
+        android:textColor="@color/white"
+        android:layout_weight="2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"></TextView>
+
+</LinearLayout>
