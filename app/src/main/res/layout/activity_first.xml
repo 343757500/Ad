@@ -1,12 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
 
-    <com.lvchuan.ad.view.NoScrollViewPager
-        android:id="@+id/view_pager"
+      <com.lvchuan.ad.view.NoScrollViewPager
+          android:visibility="gone"
+          android:id="@+id/view_pager"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
+      </com.lvchuan.ad.view.NoScrollViewPager>
+
+
+
+    <LinearLayout
+        android:id="@+id/ll_setting"
+        android:gravity="center"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </com.lvchuan.ad.view.NoScrollViewPager>
+        <TextView
+            android:id="@+id/tv_hint_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="广告屏未配置"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_22" />
 
+        <TextView
+            android:onClick="onClick"
+            android:id="@+id/tv_config_or_get_ad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_25"
+            android:gravity="center"
+            android:text="点击配置"
+            android:textColor="@android:color/holo_orange_dark"
+            android:textSize="@dimen/sp_22" />
+    </LinearLayout>
 </LinearLayout>

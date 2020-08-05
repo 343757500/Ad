@@ -1,5 +1,4 @@
 package com.lvchuan.ad.netty;
-
 import org.simple.eventbus.EventBus;
 
 import java.util.Date;
@@ -27,10 +26,14 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
      * netty自带的异步处理
      */
     private ChannelPromise handshakeFuture;
-
+    boolean flag;
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("当前握手的状态"+this.handshaker.isHandshakeComplete());
+        if (this.handshaker.isHandshakeComplete()){
+
+        }
+
         Channel ch = ctx.channel();
         FullHttpResponse response;
         // 进行握手操
@@ -75,7 +78,14 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         ctx.executor().scheduleWithFixedDelay(
+
                 new HeartBeatTask(ctx), 5, 50, TimeUnit.SECONDS);
+        System.out.println("活跃状态"+ctx);
+
+        //netty的发送
+        EventBus.getDefault().post("devId","devId");
+        //发送关闭服务
+        EventBus.getDefault().post("0","startService");
     }
 
     /**
@@ -83,8 +93,16 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("主机关闭");
+        System.out.println("主机关闭"+ctx);
+
+        //StopThread.getInstance().start();
+        Clients.getInstance().doConnect();;
+
+        //发送开启服务
+        EventBus.getDefault().post("1","startService");
+
     }
+
 
     /**
      * 异常处理
@@ -104,7 +122,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         return handshaker;
     }
 
-    void setHandshaker(WebSocketClientHandshaker handshaker) {
+    public void setHandshaker(WebSocketClientHandshaker handshaker) {
         this.handshaker = handshaker;
     }
 
@@ -139,7 +157,6 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
             return message;
         }
     }
-
 
 
 }

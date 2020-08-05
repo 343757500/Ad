@@ -3,6 +3,7 @@
     package="com.lvchuan.ad">
 
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -10,6 +11,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -45,6 +49,13 @@
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
+
+
+        <service android:enabled="true" android:name=".service.LoopService">
+            <intent-filter>
+                <action android:name="org.allin.android.musicService" />
+            </intent-filter>
+        </service>
 
 
         <meta-data

@@ -12,16 +12,22 @@ import com.bigkoo.convenientbanner.listener.OnItemClickListener;
 import com.just.agentweb.AgentWeb;
 import com.liulishuo.filedownloader.BaseDownloadTask;
 import com.liulishuo.filedownloader.FileDownloadListener;
+import com.liulishuo.filedownloader.FileDownloadQueueSet;
+import com.liulishuo.filedownloader.FileDownloadSampleListener;
 import com.liulishuo.filedownloader.FileDownloader;
+import com.liulishuo.filedownloader.util.FileDownloadUtils;
 import com.lvchuan.ad.LocalVImageHolderView;
 import com.lvchuan.ad.MainActivity;
 import com.lvchuan.ad.R;
 import com.lvchuan.ad.base.BaseFragment;
 import com.lvchuan.ad.bean.AdEntity;
+import com.lvchuan.ad.utils.FileUtil;
 
 import org.simple.eventbus.EventBus;
 import org.simple.eventbus.Subscriber;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +87,6 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                 .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
 
 
-        initData();
     }
 
     @Override
@@ -91,6 +96,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
 
     @Override
     public void initData() {
+
         initDownLoad();
     }
 
@@ -122,45 +128,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
 
 
     private void initDownLoad() {
-        FileDownloader.getImpl().create("https://dummyimage.com/600x400/00ff00/0011ff.png&text=HelloWorld").setWifiRequired(true).setPath("a.png").setListener(new FileDownloadListener() {
-            @Override
-            protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                Log.e("FileDownloader",totalBytes+"");
-            }
-
-            @Override
-            protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                int percent=(int) ((double) soFarBytes / (double) totalBytes * 100);
-                // textView.setText("("+percent+"%"+")");
-            }
-
-            @Override
-            protected void blockComplete(BaseDownloadTask task) {
-                Log.e("FileDownloader",task.getEtag()+"");
-            }
-
-            @Override
-            protected void completed(BaseDownloadTask task) {
-                Toast.makeText(getActivity(),"下载完成!",Toast.LENGTH_SHORT).show();
-                //textView.setText("("+"100%"+")");
-            }
-
-            @Override
-            protected void paused(BaseDownloadTask task, int soFarBytes, int totalBytes) {
-                Log.e("FileDownloader",totalBytes+"");
-            }
-
-            @Override
-            protected void error(BaseDownloadTask task, Throwable e) {
-                Log.e("FileDownloader",e.getMessage());
-            }
-
-            @Override
-            protected void warn(BaseDownloadTask task) {
-                //continueDownLoad(task);//如果存在了相同的任务，那么就继续下载
-                Log.e("FileDownloader","");
-            }
-        }).start();
+        start_multi();
     }
 
 
@@ -199,7 +167,149 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     }
 
 
+    public String mSaveFolder = FileDownloadUtils.getDefaultSaveRootPath()+File.separator+"feifei_save";
+    // 多任务下载
+    private FileDownloadListener downloadListener;
 
+    public FileDownloadListener createLis(){
+        return new FileDownloadSampleListener(){
+            @Override
+            protected void pending(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                if(task.getListener() != downloadListener){
+                    return;
+                }
+                Log.d("feifei","pending taskId:"+task.getId()+",fileName:"+task.getFilename()+",soFarBytes:"+soFarBytes+",totalBytes:"+totalBytes+",percent:"+soFarBytes*1.0/totalBytes);
+
+            }
+
+            @Override
+            protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                if(task.getListener() != downloadListener){
+                    return;
+                }
+                Log.d("feifei","progress taskId:"+task.getId()+",fileName:"+task.getFilename()+",soFarBytes:"+soFarBytes+",totalBytes:"+totalBytes+",percent:"+soFarBytes*1.0/totalBytes+",speed:"+task.getSpeed());
+            }
+
+            @Override
+            protected void blockComplete(BaseDownloadTask task) {
+                if(task.getListener() != downloadListener){
+                    return;
+                }
+                Log.d("feifei","blockComplete taskId:"+task.getId()+",filePath:"+task.getPath()+",fileName:"+task.getFilename()+",speed:"+task.getSpeed()+",isReuse:"+task.reuse());
+            }
+
+            @Override
+            protected void completed(BaseDownloadTask task) {
+                if(task.getListener() != downloadListener){
+                    return;
+                }
+                Log.d("feifei","completed taskId:"+task.getId()+",isReuse:"+task.reuse());
+            }
+
+            @Override
+            protected void paused(BaseDownloadTask task, int soFarBytes, int totalBytes) {
+                if(task.getListener() != downloadListener){
+                    return;
+                }
+                Log.d("feifei","paused taskId:"+task.getId()+",soFarBytes:"+soFarBytes+",totalBytes:"+totalBytes+",percent:"+soFarBytes*1.0/totalBytes);
+            }
+
+            @Override
+            protected void error(BaseDownloadTask task, Throwable e) {
+                if(task.getListener() != downloadListener){
+                    return;
+                }
+                Log.d("feifei","error taskId:"+task.getId()+",e:"+e.getLocalizedMessage());
+            }
+
+            @Override
+            protected void warn(BaseDownloadTask task) {
+                if(task.getListener() != downloadListener){
+                    return;
+                }
+                Log.d("feifei","warn taskId:"+task.getId());
+            }
+        };
+    }
+
+    public void start_multi() {
+        FileUtil fileUtil = new FileUtil(getActivity());
+        try {
+            File adShow = fileUtil.createSDDir("AdShow");
+            if (fileUtil.isFileExist("AdShow")) {
+                downloadListener = createLis();
+                //(1) 创建 FileDownloadQueueSet
+                final FileDownloadQueueSet queueSet = new FileDownloadQueueSet(downloadListener);
+
+                //(2) 创建Task 队列
+
+                final List<BaseDownloadTask> tasks = new ArrayList<>();
+                for (int i = 0; i <bannerList.size() ; i++) {
+                    Log.e("AdFragment",bannerList.get(i).getImgHref().substring(bannerList.get(i).getImgHref().lastIndexOf("/"),bannerList.get(i).getImgHref().length()));
+                    BaseDownloadTask task = FileDownloader.getImpl().create(bannerList.get(i).getImgHref()).setPath(FileUtil.SDPATH + "AdShow" + bannerList.get(i).getImgHref().substring(bannerList.get(i).getImgHref().lastIndexOf("/"),bannerList.get(i).getImgHref().length()));
+                    tasks.add(task);
+                }
+
+                //(3) 设置参数
+                // 每个任务的进度 无回调
+                //queueSet.disableCallbackProgressTimes();
+                // do not want each task's download progress's callback,we just consider which task will completed.
+                queueSet.setCallbackProgressTimes(100);
+                queueSet.setCallbackProgressMinInterval(100);
+                //失败 重试次数
+                queueSet.setAutoRetryTimes(3);
+
+                //避免掉帧
+                FileDownloader.enableAvoidDropFrame();
+
+                //(4)串行下载
+                queueSet.downloadSequentially(tasks);
+
+                //(5)任务启动
+                queueSet.start();
+            }
+        }catch (Exception e){
+
+        }
+    }
+
+    public void stop_multi(){
+        FileDownloader.getImpl().pause(downloadListener);
+    }
+
+    public void deleteAllFile(){
+
+        //清除所有的下载任务
+        FileDownloader.getImpl().clearAllTaskData();
+
+        //清除所有下载的文件
+        int count = 0;
+        File file = new File(FileDownloadUtils.getDefaultSaveRootPath());
+        do {
+            if (!file.exists()) {
+                break;
+            }
+
+            if (!file.isDirectory()) {
+                break;
+            }
+
+            File[] files = file.listFiles();
+
+            if (files == null) {
+                break;
+            }
+
+            for (File file1 : files) {
+                count++;
+                file1.delete();
+            }
+
+        } while (false);
+
+        Toast.makeText(getActivity(),
+                String.format("Complete delete %d files", count), Toast.LENGTH_LONG).show();
+    }
 
 
 }
