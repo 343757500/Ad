@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lvchuan.ad.R;
+import com.lvchuan.ad.bean.StatisticsBean;
 import com.lvchuan.ad.view.adapter.BaseAdapterRV;
 import com.squareup.picasso.Picasso;
 
@@ -15,6 +16,7 @@ public class DailyRecoveryHolder extends BaseHolderRV {
 
     private TextView tv_category;
     private ImageView iv_p;
+    private TextView tv_unit;
 
     public DailyRecoveryHolder(Context context, ViewGroup parent, BaseAdapterRV adapter, int itemType) {
         super(context, parent, adapter, itemType, R.layout.item_daily);
@@ -25,6 +27,7 @@ public class DailyRecoveryHolder extends BaseHolderRV {
 
         tv_category = itemView.findViewById(R.id.tv_category);
         iv_p = itemView.findViewById(R.id.iv_p);
+        tv_unit = itemView.findViewById(R.id.tv_unit);
     }
 
     @Override
@@ -35,23 +38,24 @@ public class DailyRecoveryHolder extends BaseHolderRV {
             itemView.setBackgroundColor(Color.parseColor("#183E88"));
         }*/
 
-
-      switch (position){
-          case 0:
+        StatisticsBean.ReturnInfoBean.DataBean dataBean = (StatisticsBean.ReturnInfoBean.DataBean) bean;
+      switch (dataBean.getRecycleName()){
+          case "纸类":
               Picasso.with(context).load(R.mipmap.p1).into(iv_p);
               break;
-          case 1:
+          case "织物类":
               Picasso.with(context).load(R.mipmap.p2).into(iv_p);
               break;
-          case 2:
+          case "金属/塑料":
               Picasso.with(context).load(R.mipmap.p3).into(iv_p);
               break;
-          case 3:
+          case "饮料瓶":
               Picasso.with(context).load(R.mipmap.p4).into(iv_p);
               break;
       }
-        String name = (String) bean;
-        tv_category.setText(name);
+
+        tv_category.setText(dataBean.getRecycleName());
+        tv_unit.setText(dataBean.getRecycleType()+dataBean.getUnit());
 
     }
 }

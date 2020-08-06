@@ -24,6 +24,7 @@
     android:layout_height="44dp"></TextView>
 
     <TextView
+        android:id="@+id/tv_unit"
         android:textSize="15.67sp"
         android:layout_marginLeft="25dp"
         android:text="11.38kg"

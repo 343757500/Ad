@@ -57,7 +57,7 @@ public class FirstActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
 
-            viewPager.setCurrentItem(1, false);
+            viewPager.setCurrentItem(0, false);
 
             super.handleMessage(msg);
         }
@@ -79,11 +79,13 @@ public class FirstActivity extends BaseActivity {
         initViewPager();
 
         //启动netty服务
-       // Clients.getInstance().start();
+        Clients.getInstance().start();
 
         applyRxPermissions();
+       // getGps();
+    }
 
-
+    private void getGps() {
         //获取系统的LocationManager对象
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -131,10 +133,6 @@ public class FirstActivity extends BaseActivity {
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         locationUpdates(location);    //将最新的定位信息传递给创建的locationUpdates()方法中
     }
-
-
-
-
 
 
     @SuppressLint("CheckResult")
@@ -236,7 +234,6 @@ public class FirstActivity extends BaseActivity {
         fragments.add(adFragment);
         MyFragmentAdapter  myFragmentAdapter = new MyFragmentAdapter(
                 getSupportFragmentManager(), fragments);
-
         viewPager.setAdapter(myFragmentAdapter);
 
 
