@@ -79,7 +79,7 @@ public class LocalVImageHolderView extends Holder<AdEntity> implements VideoAllC
     @Override
     public void onAutoComplete(String url, Object... objects) {
         Log.e("payer", "failed to seek !");
-        //if(callback!=null)callback.onCanTurn(curId, 500);
+        if(callback!=null)callback.onCanTurn(curId, 500);
     }
 
     @Override
@@ -208,7 +208,7 @@ public class LocalVImageHolderView extends Holder<AdEntity> implements VideoAllC
                 svplayer.setVideoAllCallBack(this);
                 svplayer.setThumbImageView(coverView);
                 svplayer.startPlayLogic();
-                if(callback!=null)callback.onCanTurn(curId, 5000);
+                //if(callback!=null)callback.onCanTurn(curId, 5000);
                 return;
             }
             fl_video.setVisibility(View.GONE);

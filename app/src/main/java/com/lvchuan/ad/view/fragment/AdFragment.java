@@ -21,6 +21,7 @@ import com.lvchuan.ad.MainActivity;
 import com.lvchuan.ad.R;
 import com.lvchuan.ad.base.BaseFragment;
 import com.lvchuan.ad.bean.AdEntity;
+import com.lvchuan.ad.bean.NettyCmdBean;
 import com.lvchuan.ad.utils.FileUtil;
 
 import org.simple.eventbus.EventBus;
@@ -133,25 +134,9 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
 
 
     //netty接收到广告更换的广播
-    @Subscriber(tag = "handlecmd")
-    public void handlecmd(String message) {
-        //JSONObject jsonObject = JSONObject.parseObject(message);
+    @Subscriber(tag = "nettyCmdBean")
+    private void nettyCmdBean(NettyCmdBean nettyCmdBean) {
 
-        if (message.equals("0")){
-            lin_web.setVisibility(View.GONE);
-            adBanner.setVisibility(View.VISIBLE);
-
-        }else if (message.equals("1")){
-            adBanner.setVisibility(View.GONE);
-            lin_web.setVisibility(View.VISIBLE);
-            agentWeb = AgentWeb.with(this)
-                    .setAgentWebParent(lin_web, new LinearLayout.LayoutParams(-1, -1))
-                    .useDefaultIndicator()//进度条
-                    .createAgentWeb()
-                    .ready()
-                    .go("http://120.78.175.246/apps/#/?boxCode=LZ02-584300");
-
-        }
     }
 
     @Override

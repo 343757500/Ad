@@ -3,11 +3,14 @@ package com.lvchuan.ad;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,26 +21,27 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
-
 import com.lvchuan.ad.base.BaseActivity;
+import com.lvchuan.ad.bean.NettyCmdBean;
 import com.lvchuan.ad.netty.Clients;
 import com.lvchuan.ad.service.LoopService;
 import com.lvchuan.ad.utils.SharedPreUtil;
 import com.lvchuan.ad.view.adapter.MyFragmentAdapter;
 import com.lvchuan.ad.view.fragment.AdFragment;
 import com.lvchuan.ad.view.fragment.ConfigInputFragment;
+import com.lvchuan.ad.view.fragment.H5ViewFragment;
 import com.lvchuan.ad.view.fragment.StatisticsFragment;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.vondear.rxtool.RxDeviceTool;
 
+import org.simple.eventbus.EventBus;
 import org.simple.eventbus.Subscriber;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -57,13 +61,15 @@ public class FirstActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
 
-            viewPager.setCurrentItem(0, false);
+            viewPager.setCurrentItem(2, false);
 
             super.handleMessage(msg);
         }
     };
     private TextView tv_config_or_get_ad;
     private LinearLayout ll_setting;
+    private String locationProvider;
+    private LocationManager locationManager;
 
 
     @Override
@@ -73,66 +79,22 @@ public class FirstActivity extends BaseActivity {
 
     @Override
     public void initView() {
+        EventBus.getDefault().register(this);
         viewPager = findViewById(R.id.view_pager);
         tv_config_or_get_ad = findViewById(R.id.tv_config_or_get_ad);
         ll_setting = findViewById(R.id.ll_setting);
         initViewPager();
-
         //启动netty服务
         Clients.getInstance().start();
-
         applyRxPermissions();
-       // getGps();
+        //getGps();
     }
+
 
     private void getGps() {
-        //获取系统的LocationManager对象
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        //添加权限检查
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        //设置每一秒获取一次location信息
-        locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,      //GPS定位提供者
-                1000,       //更新数据时间为1秒
-                1,      //位置间隔为1米
-                //位置监听器
-                new LocationListener() {  //GPS定位信息发生改变时触发，用于更新位置信息
-
-                    @Override
-                    public void onLocationChanged(Location location) {
-                        //GPS信息发生改变时，更新位置
-                        locationUpdates(location);
-                    }
-
-                    @Override
-                    //位置状态发生改变时触发
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-                    }
-
-                    @Override
-                    //定位提供者启动时触发
-                    public void onProviderEnabled(String provider) {
-                    }
-
-                    @Override
-                    //定位提供者关闭时触发
-                    public void onProviderDisabled(String provider) {
-                    }
-                });
-        //从GPS获取最新的定位信息
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        locationUpdates(location);    //将最新的定位信息传递给创建的locationUpdates()方法中
+        getLocation();
     }
+
 
 
     @SuppressLint("CheckResult")
@@ -151,6 +113,7 @@ public class FirstActivity extends BaseActivity {
                         //激活人脸
                         Log.e("111","获得权限成功");
                         String devId = RxDeviceTool.getDeviceIdIMEI(this);
+                        SharedPreUtil.saveString(this,"devId",devId);
                         Log.e("devId",devId);
                     } else {
                         Toast.makeText(this, "没有获得权限", Toast.LENGTH_LONG).show();
@@ -159,47 +122,6 @@ public class FirstActivity extends BaseActivity {
     }
 
 
-
-
-
-
-
-
-
-    public void locationUpdates(Location location) {  //获取指定的查询信息
-        //如果location不为空时
-        if (location != null) {
-            StringBuilder stringBuilder = new StringBuilder();        //使用StringBuilder保存数据
-            //获取经度、纬度、等属性值
-            stringBuilder.append("您的位置信息：\n");
-            stringBuilder.append("经度：");
-            stringBuilder.append(location.getLongitude());
-            stringBuilder.append("\n纬度：");
-            stringBuilder.append(location.getLatitude());
-            Log.e("111",stringBuilder.toString());
-//            stringBuilder.append("\n精确度：");
-//            stringBuilder.append(location.getAccuracy());
-//            stringBuilder.append("\n高度：");
-//            stringBuilder.append(location.getAltitude());
-//            stringBuilder.append("\n方向：");
-//            stringBuilder.append(location.getBearing());
-//            stringBuilder.append("\n速度：");
-//            stringBuilder.append(location.getSpeed());
-//            stringBuilder.append("\n时间：");
-//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH mm ss");    //设置日期时间格式
-//            stringBuilder.append(dateFormat.format(new Date(location.getTime())));
-        } else {
-            //否则输出空信息
-            Log.e("111","没有获取到GPS信息");
-            //无法定位：1、提示用户打开定位服务；2、跳转到设置界面
-            Toast.makeText(this, "无法定位，请打开定位服务", Toast.LENGTH_SHORT).show();
-            Intent i = new Intent();
-            i.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(i);
-        }
-
-
-    }
 
     @Override
     public void initListener() {
@@ -229,9 +151,11 @@ public class FirstActivity extends BaseActivity {
     private void initViewPager() {
         StatisticsFragment statisticsFragment= new StatisticsFragment();
         AdFragment adFragment= new AdFragment();
+        H5ViewFragment h5ViewFragment = new H5ViewFragment();
         List<Fragment> fragments = new ArrayList<>();
         fragments.add(statisticsFragment);
         fragments.add(adFragment);
+        fragments.add(h5ViewFragment);
         MyFragmentAdapter  myFragmentAdapter = new MyFragmentAdapter(
                 getSupportFragmentManager(), fragments);
         viewPager.setAdapter(myFragmentAdapter);
@@ -288,5 +212,128 @@ public class FirstActivity extends BaseActivity {
 
 
 
+    @Subscriber(tag = "nettyCmdBean")
+    private void nettyCmdBean(NettyCmdBean nettyCmdBean) {
+        //viewPager.setCurrentItem(Integer.parseInt(nettyCmdBean.getMode()), false);
+    }
 
+
+
+
+
+
+
+
+
+
+
+
+
+    public static final int LOCATION_CODE = 301;
+    private void getLocation () {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //获取所有可用的位置提供器
+        List<String> providers = locationManager.getProviders(true);
+        if (providers.contains(LocationManager.GPS_PROVIDER)) {
+            //如果是GPS
+            locationProvider = LocationManager.GPS_PROVIDER;
+        } else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+            //如果是Network
+            locationProvider = LocationManager.NETWORK_PROVIDER;
+        } else {
+            Intent i = new Intent();
+            i.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(i);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //获取权限（如果没有开启权限，会弹出对话框，询问是否开启权限）
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                //请求权限
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_CODE);
+            } else {
+                //监视地理位置变化
+                locationManager.requestLocationUpdates(locationProvider, 3000, 1, locationListener);
+                Location location = locationManager.getLastKnownLocation(locationProvider);
+                Log.e("111","---"+location);
+                if (location != null) {
+                    //输入经纬度
+                    Toast.makeText(this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } else {
+            //监视地理位置变化
+            locationManager.requestLocationUpdates(locationProvider, 3000, 1, locationListener);
+            Location location = locationManager.getLastKnownLocation(locationProvider);
+            if (location != null) {
+                //不为空,显示地理位置经纬度
+                Toast.makeText(this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public LocationListener locationListener = new LocationListener() {
+        // Provider的状态在可用、暂时不可用和无服务三个状态直接切换时触发此函数
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+        // Provider被enable时触发此函数，比如GPS被打开
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+        // Provider被disable时触发此函数，比如GPS被关闭
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
+        //当坐标改变时触发此函数，如果Provider传进相同的坐标，它就不会被触发
+        @Override
+        public void onLocationChanged(Location location) {
+            if (location != null) {
+                //不为空,显示地理位置经纬度
+                Toast.makeText(FirstActivity.this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_CODE:
+                if(grantResults.length > 0 && grantResults[0] == getPackageManager().PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "申请权限", Toast.LENGTH_LONG).show();
+                    try {
+                        List<String> providers = locationManager.getProviders(true);
+                        if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                            //如果是Network
+                            locationProvider = LocationManager.NETWORK_PROVIDER;
+                        }else if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                            //如果是GPS
+                            locationProvider = LocationManager.GPS_PROVIDER;
+                        }
+                        //监视地理位置变化
+                        locationManager.requestLocationUpdates(locationProvider, 3000, 1, locationListener);
+                        Location location = locationManager.getLastKnownLocation(locationProvider);
+                        if (location != null) {
+                            //不为空,显示地理位置经纬度
+                            Toast.makeText(this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
+                        }
+                    }catch (SecurityException e){
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(this, "缺少权限", Toast.LENGTH_LONG).show();
+                    finish();
+                }
+                break;
+        }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
 }

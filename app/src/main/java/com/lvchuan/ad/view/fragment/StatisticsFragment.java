@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.gson.Gson;
 import com.lvchuan.ad.R;
 import com.lvchuan.ad.base.BaseFragment;
+import com.lvchuan.ad.bean.NettyCmdBean;
 import com.lvchuan.ad.bean.StatisticsBean;
+import com.lvchuan.ad.utils.SharedPreUtil;
 import com.lvchuan.ad.view.adapter.DailyColorAdapter;
 import com.lvchuan.ad.view.adapter.DailyRecoveryAdapter;
 import com.lzy.okgo.OkGo;
@@ -23,6 +25,8 @@ import com.razerdp.widget.animatedpieview.AnimatedPieView;
 import com.razerdp.widget.animatedpieview.AnimatedPieViewConfig;
 import com.razerdp.widget.animatedpieview.data.SimplePieInfo;
 import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
+
+import org.simple.eventbus.Subscriber;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -98,9 +102,9 @@ public class StatisticsFragment extends BaseFragment {
 
     @Override
     public void initData() {
-        OkGo.<String>get("http://192.168.11.114:8089/recycle/f/dataAnalysisMobile/znRecycleBoxAnalysis")
-                .params("time","today")
-                .params("boxCode","LZ02-563524")
+        OkGo.<String>get("http://192.168.11.130:8824/mobile/advertisementMonitor/znRecycleBoxAnalysis")
+                .params("time","thisMonth")
+                .params("devId", SharedPreUtil.getString(getActivity(),"devId",""))
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -119,14 +123,14 @@ public class StatisticsFragment extends BaseFragment {
                     @Override
                     public void onError(Response<String> response) {
                         super.onError(response);
-                        Log.e("StatisticsFragment",response.body());
+                        Log.e("StatisticsFragment","");
                     }
                 });
 
 
-        OkGo.<String>get("http://192.168.11.114:8089/recycle/f/dataAnalysisMobile/znRecycleBoxAnalysis")
+        OkGo.<String>get("http://192.168.11.130:8824/mobile/advertisementMonitor/znRecycleBoxAnalysis")
                 .params("time","thisMonth")
-                .params("boxCode","LZ02-563524")
+                .params("devId", SharedPreUtil.getString(getActivity(),"devId",""))
                 .execute(new StringCallback() {
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -148,8 +152,6 @@ public class StatisticsFragment extends BaseFragment {
 
 // 以下两句可以直接用 mAnimatedPieView.start(config); 解决，功能一致
 
-
-
                         Message message = Message.obtain();
                         message.what = 1;
                         mHandler.sendMessage(message);
@@ -161,6 +163,16 @@ public class StatisticsFragment extends BaseFragment {
                         super.onError(response);
                     }
                 });
+
+    }
+
+
+
+
+
+    //netty接收到广告更换的广播
+    @Subscriber(tag = "nettyCmdBean")
+    private void nettyCmdBean(NettyCmdBean nettyCmdBean) {
 
     }
 

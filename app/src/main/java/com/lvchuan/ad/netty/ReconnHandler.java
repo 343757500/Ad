@@ -25,8 +25,7 @@ public class ReconnHandler extends ChannelInboundHandlerAdapter {
                    try {
                        TimeUnit.SECONDS.sleep(5);
                        //发起重连
-                       Client client = new Client();
-                       client.run();
+                       Clients.getInstance().start();
                    } catch (Exception e) {
                        e.printStackTrace();
                    }

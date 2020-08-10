@@ -1,4 +1,7 @@
 package com.lvchuan.ad.netty;
+import com.google.gson.Gson;
+import com.lvchuan.ad.bean.NettyCmdBean;
+
 import org.simple.eventbus.EventBus;
 
 import java.util.Date;
@@ -64,9 +67,14 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
                 System.out.println(new Date() + "Client reciver heart beat message : ----> " + s);
 
 
-                if (s.startsWith("{"))
-                    EventBus.getDefault().post(s, "handlecmd");
-                System.out.println("客户端接收的消息是:"+textFrame.text());
+                if (s.equals("pong")) {
+
+                }else if (s.startsWith("{")){
+                    NettyCmdBean nettyCmdBean = new Gson().fromJson(s, NettyCmdBean.class);
+                    EventBus.getDefault().post(nettyCmdBean, "nettyCmdBean");
+                    System.out.println("客户端接收的消息是:"+textFrame.text());
+                }
+
             }
 
         }
