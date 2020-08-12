@@ -21,6 +21,7 @@ import com.lvchuan.ad.MainActivity;
 import com.lvchuan.ad.R;
 import com.lvchuan.ad.base.BaseFragment;
 import com.lvchuan.ad.bean.AdEntity;
+import com.lvchuan.ad.bean.InitBean;
 import com.lvchuan.ad.bean.NettyCmdBean;
 import com.lvchuan.ad.utils.FileUtil;
 
@@ -49,14 +50,14 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         EventBus.getDefault().register(this);
         lin_web = findView(R.id.lin_web);
         adBanner = findView(R.id.adBanner);
-        agentWeb = AgentWeb.with(this)
+/*        agentWeb = AgentWeb.with(this)
                 .setAgentWebParent(lin_web, new LinearLayout.LayoutParams(-1, -1))
                 .useDefaultIndicator()//进度条
                 .createAgentWeb()
                 .ready()
-                .go("https://120.78.175.246/apps/#/?boxCode=LZ02-664342");
+                .go("https://120.78.175.246/apps/#/?boxCode=LZ02-664342");*/
 
-        AdEntity adEntity1 = new AdEntity();
+      /*  AdEntity adEntity1 = new AdEntity();
         adEntity1.setImgHref("https://dummyimage.com/600x400/00ff00/0011ff.png&text=HelloWorld");
         adEntity1.setId(0);
         AdEntity adEntity2 = new AdEntity();
@@ -85,7 +86,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                 return R.layout.banner_item;
             }
         }, bannerList) .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
-                .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+                .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);*/
 
 
     }
@@ -97,8 +98,6 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
 
     @Override
     public void initData() {
-
-        initDownLoad();
     }
 
     @Override
@@ -110,7 +109,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
 
 
     private void handleAdTurn(int curId, long time) {
-        Log.e("MainActivity",curId+"::"+time);
+        Log.e("AdFragment",curId+"::"+time);
         if (adBanner != null) {
             adBanner.postDelayed(() -> {
                 if (curId < bannerList.size() - 1) {
@@ -137,6 +136,50 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     @Subscriber(tag = "nettyCmdBean")
     private void nettyCmdBean(NettyCmdBean nettyCmdBean) {
 
+    }
+
+
+    //接收activity传过来的数据展示广播
+    @Subscriber(tag = "initBean")
+    private void initBean(InitBean initBean) {
+        bannerList.clear();
+        if ("1".equals(initBean.getReturn_info().get(0).getMode())) {
+            List<InitBean.ReturnInfoBean.AdvertisementBean> advertisement = initBean.getReturn_info().get(0).getAdvertisement();
+
+            for (int i = 0; i < advertisement.size(); i++) {
+                AdEntity adEntity = new AdEntity();
+                adEntity.setId(i);
+                adEntity.setImgHref(advertisement.get(i).getPath());
+                bannerList.add(adEntity);
+            }
+
+            adBanner.setPages(new CBViewHolderCreator() {
+                @Override
+                public Holder createHolder(View itemView) {
+                    LocalVImageHolderView localImageHolderView = new LocalVImageHolderView(itemView);
+                    localImageHolderView.setCallback((curId, time) -> {
+                        handleAdTurn(curId, time);
+                    });
+                    return localImageHolderView;
+                }
+
+                @Override
+                public int getLayoutId() {
+                    return R.layout.banner_item;
+                }
+            }, bannerList).setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
+                    .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+
+            //下载资源到本地，没有网络的情况下显示
+            //initDownLoad();
+        }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -296,5 +339,24 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                 String.format("Complete delete %d files", count), Toast.LENGTH_LONG).show();
     }
 
+
+
+    //删除文件夹和文件夹里面的文件
+    public static void deleteDir(final String pPath) {
+        File dir = new File(pPath);
+        deleteDirWihtFile(dir);
+    }
+
+    public static void deleteDirWihtFile(File dir) {
+        if (dir == null || !dir.exists() || !dir.isDirectory())
+            return;
+        for (File file : dir.listFiles()) {
+            if (file.isFile())
+                file.delete(); // 删除所有文件
+            else if (file.isDirectory())
+                deleteDirWihtFile(file); // 递规的方式删除文件夹
+        }
+        dir.delete();// 删除目录本身
+    }
 
 }

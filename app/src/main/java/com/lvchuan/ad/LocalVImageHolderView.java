@@ -195,9 +195,9 @@ public class LocalVImageHolderView extends Holder<AdEntity> implements VideoAllC
                     return;
                 }*/
                 fl_video.setVisibility(View.VISIBLE);
-               // pl_ad_video.setCoverView(coverView);
+                // pl_ad_video.setCoverView(coverView);
                 iv_ad_img.setVisibility(View.GONE);
-               // initAvOptions();
+                // initAvOptions();
                 Glide.with(ClientApplication.getInstance()
                         .getApplicationContext())
                         .load("http://mmbiz.qpic.cn/mmbiz/PwIlO51l7wuFyoFwAXfqPNETWCibjNACIt6ydN7vw8LeIwT7IjyG3eeribmK4rhibecvNKiaT2qeJRIWXLuKYPiaqtQ/0")
@@ -213,17 +213,10 @@ public class LocalVImageHolderView extends Holder<AdEntity> implements VideoAllC
             }
             fl_video.setVisibility(View.GONE);
             iv_ad_img.setVisibility(View.VISIBLE);
-            if(data.getStatus()==0){
-                Glide.with(ClientApplication.getInstance()
+            Glide.with(ClientApplication.getInstance()
                         .getApplicationContext())
                         .load(data.getImgHref())
                         .into(iv_ad_img);
-            }else{
-                Glide.with(ClientApplication.getInstance()
-                        .getApplicationContext())
-                        .load(data.getLocalCache())
-                        .into(iv_ad_img);
-            }
             if(callback!=null)callback.onCanTurn(curId, 5000);
         }
     }
@@ -254,7 +247,7 @@ public class LocalVImageHolderView extends Holder<AdEntity> implements VideoAllC
     private PLOnCompletionListener mOnCompletionListener = new PLOnCompletionListener() {
         @Override
         public void onCompletion() {
-           // pl_ad_video.stopPlayback();
+            // pl_ad_video.stopPlayback();
             if(callback!=null)callback.onCanTurn(curId, 1000);
         }
     };

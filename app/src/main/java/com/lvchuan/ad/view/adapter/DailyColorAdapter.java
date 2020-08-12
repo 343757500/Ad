@@ -10,12 +10,12 @@ import com.lvchuan.ad.view.Holder.DailyRecoveryHolder;
 import java.util.List;
 
 public class DailyColorAdapter extends BaseAdapterRV {
-    public DailyColorAdapter(Context context, List listData) {
-        super(context, listData);
-    }
+  public DailyColorAdapter(Context context, List listData) {
+    super(context, listData);
+  }
 
-    @Override
-    public BaseHolderRV createViewHolder(Context context, ViewGroup parent, int viewType) {
-        return new DailyColorHolder(context,parent,this,viewType);
-    }
+  @Override
+  public BaseHolderRV createViewHolder(Context context, ViewGroup parent, int viewType) {
+    return new DailyColorHolder(context,parent,this,viewType);
+  }
 }

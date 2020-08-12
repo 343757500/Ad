@@ -23,7 +23,7 @@ import io.netty.util.CharsetUtil;
 public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {/**
  * 握手的状态信息
  */
-    private WebSocketClientHandshaker handshaker;
+private WebSocketClientHandshaker handshaker;
 
     /**
      * netty自带的异步处理
@@ -72,7 +72,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
                 }else if (s.startsWith("{")){
                     NettyCmdBean nettyCmdBean = new Gson().fromJson(s, NettyCmdBean.class);
                     EventBus.getDefault().post(nettyCmdBean, "nettyCmdBean");
-                    System.out.println("客户端接收的消息是:"+textFrame.text());
+                    System.out.println("客户端接收的消息是:"+new Gson().toJson(nettyCmdBean));
                 }
 
             }

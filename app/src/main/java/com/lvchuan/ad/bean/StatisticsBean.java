@@ -4,9 +4,10 @@ import java.util.List;
 
 public class StatisticsBean {
 
+
     /**
      * common_return : true
-     * return_info : [{"date":"2020-08-10 星期一","boxName":"LZ02-316563","data":[{"recycleName":"饮料瓶","unit":"个","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8WsMWARzWoAABGqdmqfMs828.jpg","recycleWeight":1,"recycleType":"w_drinks"},{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":106.53,"recycleType":"w_spinning"}]}]
+     * return_info : [{"date":"2020-08-12 星期三","boxName":"LZ02-316563","data":[{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":49.97,"recycleType":"w_spinning"}]}]
      */
 
     private boolean common_return;
@@ -30,9 +31,9 @@ public class StatisticsBean {
 
     public static class ReturnInfoBean {
         /**
-         * date : 2020-08-10 星期一
+         * date : 2020-08-12 星期三
          * boxName : LZ02-316563
-         * data : [{"recycleName":"饮料瓶","unit":"个","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8WsMWARzWoAABGqdmqfMs828.jpg","recycleWeight":1,"recycleType":"w_drinks"},{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":106.53,"recycleType":"w_spinning"}]
+         * data : [{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":49.97,"recycleType":"w_spinning"}]
          */
 
         private String date;
@@ -65,17 +66,17 @@ public class StatisticsBean {
 
         public static class DataBean {
             /**
-             * recycleName : 饮料瓶
-             * unit : 个
-             * iocPath : http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8WsMWARzWoAABGqdmqfMs828.jpg
-             * recycleWeight : 1
-             * recycleType : w_drinks
+             * recycleName : 废纺
+             * unit : KG
+             * iocPath : http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg
+             * recycleWeight : 49.97
+             * recycleType : w_spinning
              */
 
             private String recycleName;
             private String unit;
             private String iocPath;
-            private int recycleWeight;
+            private double recycleWeight;
             private String recycleType;
 
             public String getRecycleName() {
@@ -102,11 +103,11 @@ public class StatisticsBean {
                 this.iocPath = iocPath;
             }
 
-            public int getRecycleWeight() {
+            public double getRecycleWeight() {
                 return recycleWeight;
             }
 
-            public void setRecycleWeight(int recycleWeight) {
+            public void setRecycleWeight(double recycleWeight) {
                 this.recycleWeight = recycleWeight;
             }
 

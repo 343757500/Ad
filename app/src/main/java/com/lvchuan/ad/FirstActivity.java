@@ -27,8 +27,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
+
+import com.google.gson.Gson;
 import com.lvchuan.ad.base.BaseActivity;
+import com.lvchuan.ad.bean.InitBean;
 import com.lvchuan.ad.bean.NettyCmdBean;
+import com.lvchuan.ad.http.BaseUrl;
+import com.lvchuan.ad.http.HttpUrl;
 import com.lvchuan.ad.netty.Clients;
 import com.lvchuan.ad.service.LoopService;
 import com.lvchuan.ad.utils.SharedPreUtil;
@@ -37,6 +42,9 @@ import com.lvchuan.ad.view.fragment.AdFragment;
 import com.lvchuan.ad.view.fragment.ConfigInputFragment;
 import com.lvchuan.ad.view.fragment.H5ViewFragment;
 import com.lvchuan.ad.view.fragment.StatisticsFragment;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.callback.StringCallback;
+import com.lzy.okgo.model.Response;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.vondear.rxtool.RxDeviceTool;
 
@@ -51,6 +59,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 import static android.content.ContentValues.TAG;
+import static com.vondear.rxtool.view.RxToast.showToast;
 
 public class FirstActivity extends BaseActivity {
 
@@ -61,7 +70,7 @@ public class FirstActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
 
-            viewPager.setCurrentItem(2, false);
+            //viewPager.setCurrentItem(1, false);
 
             super.handleMessage(msg);
         }
@@ -80,6 +89,7 @@ public class FirstActivity extends BaseActivity {
     @Override
     public void initView() {
         EventBus.getDefault().register(this);
+        hideBottomUIMenu();
         viewPager = findViewById(R.id.view_pager);
         tv_config_or_get_ad = findViewById(R.id.tv_config_or_get_ad);
         ll_setting = findViewById(R.id.ll_setting);
@@ -149,31 +159,51 @@ public class FirstActivity extends BaseActivity {
 
 
     private void initViewPager() {
-        StatisticsFragment statisticsFragment= new StatisticsFragment();
+
         AdFragment adFragment= new AdFragment();
+        StatisticsFragment statisticsFragment= new StatisticsFragment();
         H5ViewFragment h5ViewFragment = new H5ViewFragment();
         List<Fragment> fragments = new ArrayList<>();
-        fragments.add(statisticsFragment);
         fragments.add(adFragment);
+        fragments.add(statisticsFragment);
         fragments.add(h5ViewFragment);
         MyFragmentAdapter  myFragmentAdapter = new MyFragmentAdapter(
                 getSupportFragmentManager(), fragments);
         viewPager.setAdapter(myFragmentAdapter);
-
-
-
-
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                Message message = new Message();
-                message.what = 1;
-                handler.sendMessage(message);
-            }
-        };
-        timer.schedule(task, 20000, 20000);
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sendDevId(SharedPreUtil.getString(FirstActivity.this,"devId",""));
+    }
+
+    // 发送设备Id到服务器
+    private void sendDevId(String devId) {
+        String sendId =BaseUrl.BASE_URL+ HttpUrl.INIT;
+        OkGo.<String>get(sendId)
+                .params("devId", devId)
+                .execute(new StringCallback() {
+                    @Override
+                    public void onSuccess(Response<String> response) {
+                        String initJson = response.body().toString();
+                        if (initJson.contains("true")) {
+                            InitBean initBean = new Gson().fromJson(initJson, InitBean.class);
+                            String mode = initBean.getReturn_info().get(0).getMode();
+                            viewPager.setCurrentItem(Integer.parseInt(mode) - 1, false);
+                            Log.e("FirstActivity","发送广播"+new Gson().toJson(initBean));
+                            EventBus.getDefault().post(initBean, "initBean");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Response<String> response) {
+                        super.onError(response);
+                    }
+                });
+    }
+
 
 
 
@@ -201,7 +231,7 @@ public class FirstActivity extends BaseActivity {
             String devId= SharedPreUtil.getString(FirstActivity.this,"devId","");
             if (!"".equals(devId)) {
                 Channel channel = Clients.channel;
-                TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame("{\"flag\":\"BindChannelAndDevice\",\"devId\":\"" + devId + "\"}");
+                TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame("{\"flag\":\"BindAndroidChannelAndDevice\",\"devId\":\"" + devId + "\"}");
                 channel.writeAndFlush(textWebSocketFrame);
             }
         }catch (Exception e){
@@ -214,7 +244,11 @@ public class FirstActivity extends BaseActivity {
 
     @Subscriber(tag = "nettyCmdBean")
     private void nettyCmdBean(NettyCmdBean nettyCmdBean) {
-        //viewPager.setCurrentItem(Integer.parseInt(nettyCmdBean.getMode()), false);
+        Log.e("nettyCmdBean","广播：："+new Gson().toJson(nettyCmdBean));
+        if ("init".equals(nettyCmdBean.getFlag())){
+            sendDevId(SharedPreUtil.getString(FirstActivity.this,"devId",""));
+        }
+
     }
 
 
@@ -335,5 +369,25 @@ public class FirstActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+    }
+
+
+
+
+    /**
+     * 隐藏虚拟按键，并且全屏
+     */
+    protected void hideBottomUIMenu() {
+        //隐藏虚拟按键，并且全屏
+        if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) { // lower api
+            View v = this.getWindow().getDecorView();
+            v.setSystemUiVisibility(View.GONE);
+        } else if (Build.VERSION.SDK_INT >= 19) {
+            //for new api versions.
+            View decorView = getWindow().getDecorView();
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
     }
 }

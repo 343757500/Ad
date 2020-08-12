@@ -10,29 +10,29 @@ import io.netty.handler.timeout.IdleStateEvent;
 
 public class ReconnHandler extends ChannelInboundHandlerAdapter {
 
-    private ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+  private ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 
 
-    @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+  @Override
+  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 //        super.userEventTriggered(ctx, evt);
-       if(evt instanceof IdleStateEvent){
-           executor.execute(new Runnable() {
-               @Override
-               public void run() {
-                   System.out.println("Client 尝试重新连接-->>>>>>");
-                   //等待InterVAl时间，重连
-                   try {
-                       TimeUnit.SECONDS.sleep(5);
-                       //发起重连
-                       Clients.getInstance().start();
-                   } catch (Exception e) {
-                       e.printStackTrace();
-                   }
+    if(evt instanceof IdleStateEvent){
+      executor.execute(new Runnable() {
+        @Override
+        public void run() {
+          System.out.println("Client 尝试重新连接-->>>>>>");
+          //等待InterVAl时间，重连
+          try {
+            TimeUnit.SECONDS.sleep(5);
+            //发起重连
+            Clients.getInstance().start();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
 
-               }
-           });
-       }
+        }
+      });
     }
+  }
 
 }
