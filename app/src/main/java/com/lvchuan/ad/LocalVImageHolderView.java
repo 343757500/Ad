@@ -200,7 +200,7 @@ public class LocalVImageHolderView extends Holder<AdEntity> implements VideoAllC
                 // initAvOptions();
                 Glide.with(ClientApplication.getInstance()
                         .getApplicationContext())
-                        .load("http://mmbiz.qpic.cn/mmbiz/PwIlO51l7wuFyoFwAXfqPNETWCibjNACIt6ydN7vw8LeIwT7IjyG3eeribmK4rhibecvNKiaT2qeJRIWXLuKYPiaqtQ/0")
+                        .load("")
                         .into(coverView);
                 ((ViewGroup)coverView.getParent()).removeView(coverView);
 
@@ -213,10 +213,17 @@ public class LocalVImageHolderView extends Holder<AdEntity> implements VideoAllC
             }
             fl_video.setVisibility(View.GONE);
             iv_ad_img.setVisibility(View.VISIBLE);
-            Glide.with(ClientApplication.getInstance()
+            if(data.getStatus()==0){
+                Glide.with(ClientApplication.getInstance()
                         .getApplicationContext())
                         .load(data.getImgHref())
                         .into(iv_ad_img);
+            }else{
+                Glide.with(ClientApplication.getInstance()
+                        .getApplicationContext())
+                        .load(new File(data.getImgHref()))
+                        .into(iv_ad_img);
+            }
             if(callback!=null)callback.onCanTurn(curId, 5000);
         }
     }

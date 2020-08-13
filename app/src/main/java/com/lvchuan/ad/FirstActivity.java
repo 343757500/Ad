@@ -3,6 +3,7 @@ package com.lvchuan.ad;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -159,7 +160,6 @@ public class FirstActivity extends BaseActivity {
 
 
     private void initViewPager() {
-
         AdFragment adFragment= new AdFragment();
         StatisticsFragment statisticsFragment= new StatisticsFragment();
         H5ViewFragment h5ViewFragment = new H5ViewFragment();
@@ -170,6 +170,7 @@ public class FirstActivity extends BaseActivity {
         MyFragmentAdapter  myFragmentAdapter = new MyFragmentAdapter(
                 getSupportFragmentManager(), fragments);
         viewPager.setAdapter(myFragmentAdapter);
+        viewPager.setOffscreenPageLimit(fragments.size()); //预加载
     }
 
 
@@ -194,6 +195,9 @@ public class FirstActivity extends BaseActivity {
                             viewPager.setCurrentItem(Integer.parseInt(mode) - 1, false);
                             Log.e("FirstActivity","发送广播"+new Gson().toJson(initBean));
                             EventBus.getDefault().post(initBean, "initBean");
+                        }else{
+                            viewPager.setCurrentItem(0, false);
+                            EventBus.getDefault().post("", "initNotBean");
                         }
                     }
 
@@ -214,6 +218,10 @@ public class FirstActivity extends BaseActivity {
     private void setService(String staues) {
 
         if ("1".equals(staues)){
+            boolean serviceRunning = isServiceRunning("com.lvchuan.ad.service.LoopService");
+            if (serviceRunning){
+                return;
+            }
             Intent intentFour = new Intent(this, LoopService.class);
             startService(intentFour);
         }else{
@@ -221,6 +229,20 @@ public class FirstActivity extends BaseActivity {
             stopService(intentFour);
         }
 
+    }
+
+
+    /**
+     * 判断服务是否运行
+     */
+    private boolean isServiceRunning(final String className) {
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> info = activityManager.getRunningServices(Integer.MAX_VALUE);
+        if (info == null || info.size() == 0) return false;
+        for (ActivityManager.RunningServiceInfo aInfo : info) {
+            if (className.equals(aInfo.service.getClassName())) return true;
+        }
+        return false;
     }
 
 
@@ -240,6 +262,10 @@ public class FirstActivity extends BaseActivity {
 
     }
 
+    @Subscriber(tag = "viewChange")
+    private void viewChange(String devIds) {
+        viewPager.setCurrentItem(0, false);
+    }
 
 
     @Subscriber(tag = "nettyCmdBean")
@@ -248,7 +274,6 @@ public class FirstActivity extends BaseActivity {
         if ("init".equals(nettyCmdBean.getFlag())){
             sendDevId(SharedPreUtil.getString(FirstActivity.this,"devId",""));
         }
-
     }
 
 

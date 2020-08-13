@@ -34,6 +34,7 @@ import com.shuyu.gsyvideoplayer.video.StandardGSYVideoPlayer;
 import org.simple.eventbus.EventBus;
 import org.simple.eventbus.Subscriber;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,6 +63,7 @@ public class StatisticsFragment extends BaseFragment {
             }
         };
     };
+    private TextView tv_name;
 
     @Override
     public int getLayoutRes() {
@@ -72,6 +74,7 @@ public class StatisticsFragment extends BaseFragment {
     public void initView() {
         EventBus.getDefault().register(this);
         TextView time1 = findView(R.id.time1);
+        tv_name = findView(R.id.tv_name);
         rv = findView(R.id.rv);
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
         dailyRecoveryAdapter = new DailyRecoveryAdapter(getActivity(), null);
@@ -118,8 +121,7 @@ public class StatisticsFragment extends BaseFragment {
     @Subscriber(tag = "initBean")
     private void initBean(InitBean initBean) {
         if ("2".equals(initBean.getReturn_info().get(0).getMode())) {
-            config = new AnimatedPieViewConfig();
-
+            AnimatedPieViewConfig  configs = new AnimatedPieViewConfig();
             List<InitBean.ReturnInfoBean.AdvertisementBean> advertisement = initBean.getReturn_info().get(0).getAdvertisement();
             OkGo.<String>get(BaseUrl.BASE_URL + HttpUrl.STATISTICS)
                     .params("time", "today")
@@ -131,6 +133,7 @@ public class StatisticsFragment extends BaseFragment {
                             StatisticsBean statisticsBean = new Gson().fromJson(response.body().toString(), StatisticsBean.class);
                             List<StatisticsBean.ReturnInfoBean> returnList = statisticsBean.getReturn_info();
                             List<StatisticsBean.ReturnInfoBean.DataBean> data = returnList.get(0).getData();
+                            tv_name.setText("回收统计数据:"+returnList.get(0).getBoxName());
                             Message message = Message.obtain();
                             message.what = 0;
                             message.obj = data;
@@ -143,7 +146,7 @@ public class StatisticsFragment extends BaseFragment {
                             Log.e("StatisticsFragment", "");
                         }
                     });
-        }
+
 
 
         OkGo.<String>get(BaseUrl.BASE_URL+ HttpUrl.STATISTICS)
@@ -151,7 +154,8 @@ public class StatisticsFragment extends BaseFragment {
                 .params("devId", SharedPreUtil.getString(getActivity(),"devId",""))
                 .execute(new StringCallback() {
 
-                    private double weight;
+                    private String weight;
+                    private double weightDouble;
 
                     @Override
                     public void onSuccess(Response<String> response) {
@@ -162,22 +166,28 @@ public class StatisticsFragment extends BaseFragment {
 
                         for (int i = 0; i < data.size(); i++) {
                             if (data.get(i).getUnit().equals("个")){
-                                weight = data.get(i).getRecycleWeight()*0.05;
+                                DecimalFormat df = new DecimalFormat("#####0.00");
+                                 weightDouble = data.get(i).getRecycleWeight()*0.005;
+                                 weight = df.format(weightDouble);
                             }else{
-                                 weight=data.get(i).getRecycleWeight();
+                                 weight=data.get(i).getRecycleWeight()+"";
+                                weightDouble=data.get(i).getRecycleWeight();
                             }
-                            config.startAngle(-90)// 起始角度偏移
-                                    .addData(new SimplePieInfo(data.get(i).getRecycleWeight(), ContextCompat.getColor(getActivity(),colorList[i]), data.get(i).getRecycleName()+weight+"(kg)"))//数据（实现IPieInfo接口的bean）
-                                    .duration(2000)
+                            configs.startAngle(-90)// 起始角度偏移
+                                    .addData(new SimplePieInfo(weightDouble, ContextCompat.getColor(getActivity(),colorList[i]), data.get(i).getRecycleName()+weight+"(kg)"))//数据（实现IPieInfo接口的bean）
+                                    .duration(0)
                                     .setTextSize(50)
                                     .strokeMode(false)
                                     .pieRadius(300)
                                     .drawText(true);// 持续时间
+
+                            mAnimatedPieView.applyConfig(configs);
+                            mAnimatedPieView.start();
                         }
         // 以下两句可以直接用 mAnimatedPieView.start(config); 解决，功能一致
-                        Message message = Message.obtain();
+                       /* Message message = Message.obtain();
                         message.what = 1;
-                        mHandler.sendMessage(message);
+                        mHandler.sendMessage(message);*/
                         //dailyColorAdapter.setDatas(data);
                     }
 
@@ -186,6 +196,8 @@ public class StatisticsFragment extends BaseFragment {
                         super.onError(response);
                     }
                 });
+
+        }
     }
 
 

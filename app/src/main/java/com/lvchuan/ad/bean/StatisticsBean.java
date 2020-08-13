@@ -7,7 +7,7 @@ public class StatisticsBean {
 
     /**
      * common_return : true
-     * return_info : [{"date":"2020-08-12 星期三","boxName":"LZ02-316563","data":[{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":49.97,"recycleType":"w_spinning"}]}]
+     * return_info : [{"date":"2020-08-13 星期四","boxName":"宝趣玫瑰世界","data":[{"recycleName":"饮料瓶","unit":"个","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8WsMWARzWoAABGqdmqfMs828.jpg","recycleWeight":3,"recycleType":"w_drinks"},{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":226.84,"recycleType":"w_spinning"}]}]
      */
 
     private boolean common_return;
@@ -31,9 +31,9 @@ public class StatisticsBean {
 
     public static class ReturnInfoBean {
         /**
-         * date : 2020-08-12 星期三
-         * boxName : LZ02-316563
-         * data : [{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":49.97,"recycleType":"w_spinning"}]
+         * date : 2020-08-13 星期四
+         * boxName : 宝趣玫瑰世界
+         * data : [{"recycleName":"饮料瓶","unit":"个","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8WsMWARzWoAABGqdmqfMs828.jpg","recycleWeight":3,"recycleType":"w_drinks"},{"recycleName":"废纺","unit":"KG","iocPath":"http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg","recycleWeight":226.84,"recycleType":"w_spinning"}]
          */
 
         private String date;
@@ -66,11 +66,11 @@ public class StatisticsBean {
 
         public static class DataBean {
             /**
-             * recycleName : 废纺
-             * unit : KG
-             * iocPath : http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8Wpg6AezCyAABNKfQ5ZsY594.jpg
-             * recycleWeight : 49.97
-             * recycleType : w_spinning
+             * recycleName : 饮料瓶
+             * unit : 个
+             * iocPath : http://120.79.10.126:8888/group1/M00/00/01/rBIWZV8WsMWARzWoAABGqdmqfMs828.jpg
+             * recycleWeight : 3
+             * recycleType : w_drinks
              */
 
             private String recycleName;

@@ -31,6 +31,7 @@ public class H5ViewFragment extends BaseFragment {
     @Override
     public void initView() {
         EventBus.getDefault().register(this);
+        lin_web = findView(R.id.lin_web);
 
     }
 
@@ -64,7 +65,7 @@ public class H5ViewFragment extends BaseFragment {
         if ("3".equals(initBean.getReturn_info().get(0).getMode())) {
             lin_web = findView(R.id.lin_web);
             List<InitBean.ReturnInfoBean.AdvertisementBean> advertisement = initBean.getReturn_info().get(0).getAdvertisement();
-            AgentWeb.with(this)
+            AgentWeb agentWeb = AgentWeb.with(this.getActivity())
                     .setAgentWebParent(lin_web, new LinearLayout.LayoutParams(-1, -1))
                     .useDefaultIndicator()//进度条
                     .createAgentWeb()

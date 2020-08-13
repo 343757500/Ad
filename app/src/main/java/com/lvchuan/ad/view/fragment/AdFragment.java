@@ -24,6 +24,7 @@ import com.lvchuan.ad.bean.AdEntity;
 import com.lvchuan.ad.bean.InitBean;
 import com.lvchuan.ad.bean.NettyCmdBean;
 import com.lvchuan.ad.utils.FileUtil;
+import com.lvchuan.ad.utils.NetworkUtil;
 
 import org.simple.eventbus.EventBus;
 import org.simple.eventbus.Subscriber;
@@ -38,6 +39,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     private LinearLayout lin_web;
     private ConvenientBanner adBanner;
     List<AdEntity> bannerList = new ArrayList<>();
+    private boolean isTurning;
 
 
     @Override
@@ -50,44 +52,39 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         EventBus.getDefault().register(this);
         lin_web = findView(R.id.lin_web);
         adBanner = findView(R.id.adBanner);
-/*        agentWeb = AgentWeb.with(this)
-                .setAgentWebParent(lin_web, new LinearLayout.LayoutParams(-1, -1))
-                .useDefaultIndicator()//进度条
-                .createAgentWeb()
-                .ready()
-                .go("https://120.78.175.246/apps/#/?boxCode=LZ02-664342");*/
 
-      /*  AdEntity adEntity1 = new AdEntity();
-        adEntity1.setImgHref("https://dummyimage.com/600x400/00ff00/0011ff.png&text=HelloWorld");
-        adEntity1.setId(0);
-        AdEntity adEntity2 = new AdEntity();
-        adEntity2.setId(1);
-        adEntity2.setImgHref("https://stream7.iqilu.com/10339/upload_transcode/202002/17/20200217101826WjyFCbUXQ2.mp4");
-        AdEntity adEntity = new AdEntity();
-        adEntity.setId(2);
-        adEntity.setImgHref("http://mmbiz.qpic.cn/mmbiz/PwIlO51l7wuFyoFwAXfqPNETWCibjNACIt6ydN7vw8LeIwT7IjyG3eeribmK4rhibecvNKiaT2qeJRIWXLuKYPiaqtQ/0");
-        bannerList.add(adEntity1);
-        bannerList.add(adEntity2);
-        bannerList.add(adEntity);
-
-
-        adBanner.setPages(new CBViewHolderCreator() {
-            @Override
-            public Holder createHolder(View itemView) {
-                LocalVImageHolderView localImageHolderView = new LocalVImageHolderView(itemView);
-                localImageHolderView.setCallback((curId, time) -> {
-                    handleAdTurn(curId, time);
-                });
-                return localImageHolderView;
+        boolean networkAvailable = NetworkUtil.isNetworkAvailable(getActivity());
+        if (!networkAvailable){
+            Toast.makeText(getActivity(),"当前网络异常",Toast.LENGTH_LONG).show();
+            FileUtil fileUtil=new FileUtil(getActivity());
+            List<String> filesAllName = getFilesAllName(fileUtil.SDPATH + "AdShow");
+            bannerList.clear();
+            for (int i = 0; i < filesAllName.size(); i++) {
+                AdEntity adEntity = new AdEntity();
+                adEntity.setId(i);
+                adEntity.setStatus(1);
+                adEntity.setImgHref(filesAllName.get(i));
+                bannerList.add(adEntity);
             }
+            adBanner.setPages(new CBViewHolderCreator() {
+                @Override
+                public Holder createHolder(View itemView) {
+                    LocalVImageHolderView localImageHolderView = new LocalVImageHolderView(itemView);
+                    localImageHolderView.setCallback((curId, time) -> {
+                        handleAdTurn(curId, time);
+                    });
+                    return localImageHolderView;
+                }
 
-            @Override
-            public int getLayoutId() {
-                return R.layout.banner_item;
-            }
-        }, bannerList) .setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
-                .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);*/
-
+                @Override
+                public int getLayoutId() {
+                    return R.layout.banner_item;
+                }
+            }, bannerList).setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
+                    .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+        }else {
+            Toast.makeText(getActivity(),"当前网络正常",Toast.LENGTH_LONG).show();
+        }
 
     }
 
@@ -106,19 +103,31 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     }
 
 
-
-
     private void handleAdTurn(int curId, long time) {
         Log.e("AdFragment",curId+"::"+time);
         if (adBanner != null) {
-            adBanner.postDelayed(() -> {
-                if (curId < bannerList.size() - 1) {
-                    if (adBanner != null) adBanner.setCurrentItem(curId + 1, false);
-                } else {
-                    if (adBanner != null) adBanner.notifyDataSetChanged();
-                }
-            }, time);
+            if (isTurning) {
+                adBanner.postDelayed(() -> {
+                    if (curId < bannerList.size() - 1) {
+                        if (adBanner != null) adBanner.setCurrentItem(curId + 1, false);
+                    } else {
+                        if (adBanner != null) adBanner.notifyDataSetChanged();
+                    }
+                }, time);
+            }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isTurning = true;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        isTurning=false;
     }
 
     @Override
@@ -149,6 +158,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
             for (int i = 0; i < advertisement.size(); i++) {
                 AdEntity adEntity = new AdEntity();
                 adEntity.setId(i);
+                adEntity.setStatus(0);
                 adEntity.setImgHref(advertisement.get(i).getPath());
                 bannerList.add(adEntity);
             }
@@ -171,8 +181,48 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                     .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
 
             //下载资源到本地，没有网络的情况下显示
-            //initDownLoad();
+            initDownLoad();
         }
+    }
+
+
+
+    //接收activity传过来的数据展示广播
+    @Subscriber(tag = "initNotBean")
+    private void initNotBean(String message) {
+        FileUtil fileUtil=new FileUtil(getActivity());
+        List<String> filesAllName = getFilesAllName(fileUtil.SDPATH + "AdShow");
+        bannerList.clear();
+        for (int i = 0; i < filesAllName.size(); i++) {
+            AdEntity adEntity = new AdEntity();
+            adEntity.setId(i);
+            adEntity.setStatus(1);
+            adEntity.setImgHref(filesAllName.get(i));
+            bannerList.add(adEntity);
+        }
+        adBanner.setPages(new CBViewHolderCreator() {
+            @Override
+            public Holder createHolder(View itemView) {
+                LocalVImageHolderView localImageHolderView = new LocalVImageHolderView(itemView);
+                localImageHolderView.setCallback((curId, time) -> {
+                    handleAdTurn(curId, time);
+                });
+                return localImageHolderView;
+            }
+
+            @Override
+            public int getLayoutId() {
+                return R.layout.banner_item;
+            }
+        }, bannerList).setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
+                .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+    }
+
+
+
+    @Subscriber(tag = "viewChange")
+    private void viewChange(String devIds) {
+      initView();
     }
 
 
@@ -265,6 +315,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         try {
             File adShow = fileUtil.createSDDir("AdShow");
             if (fileUtil.isFileExist("AdShow")) {
+                deleteDir(fileUtil.SDCardPath()+"AdShow");
                 downloadListener = createLis();
                 //(1) 创建 FileDownloadQueueSet
                 final FileDownloadQueueSet queueSet = new FileDownloadQueueSet(downloadListener);
@@ -277,7 +328,6 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                     BaseDownloadTask task = FileDownloader.getImpl().create(bannerList.get(i).getImgHref()).setPath(FileUtil.SDPATH + "AdShow" + bannerList.get(i).getImgHref().substring(bannerList.get(i).getImgHref().lastIndexOf("/"),bannerList.get(i).getImgHref().length()));
                     tasks.add(task);
                 }
-
                 //(3) 设置参数
                 // 每个任务的进度 无回调
                 //queueSet.disableCallbackProgressTimes();
@@ -286,18 +336,15 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                 queueSet.setCallbackProgressMinInterval(100);
                 //失败 重试次数
                 queueSet.setAutoRetryTimes(3);
-
                 //避免掉帧
                 FileDownloader.enableAvoidDropFrame();
-
                 //(4)串行下载
                 queueSet.downloadSequentially(tasks);
-
                 //(5)任务启动
                 queueSet.start();
             }
         }catch (Exception e){
-
+            Log.e("AdFragment",e.getMessage());
         }
     }
 
@@ -356,7 +403,20 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
             else if (file.isDirectory())
                 deleteDirWihtFile(file); // 递规的方式删除文件夹
         }
-        dir.delete();// 删除目录本身
+       // dir.delete();// 删除目录本身
+    }
+
+
+
+    public static List<String> getFilesAllName(String path) {
+        File file=new File(path);
+        File[] files=file.listFiles();
+        if (files == null){Log.e("error","空目录");return null;}
+        List<String> s = new ArrayList<>();
+        for(int i =0;i<files.length;i++){
+            s.add(files[i].getAbsolutePath());
+        }
+        return s;
     }
 
 }

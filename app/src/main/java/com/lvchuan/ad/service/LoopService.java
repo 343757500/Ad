@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 
 import com.lvchuan.ad.netty.Clients;
 
+import org.simple.eventbus.EventBus;
+
 public class LoopService extends Service {
   public  static Handler handlerAlive=new Handler();
    public static Runnable runnableAlive=new Runnable() {
@@ -23,6 +25,7 @@ public class LoopService extends Service {
             handlerAlive.postDelayed(this, 20000);
         }
     };
+    private static boolean isNetWork =true;
 
 
     @Override
@@ -38,8 +41,6 @@ public class LoopService extends Service {
 
     @SuppressLint("WrongConstant")
     public int onStartCommand(Intent intent, int flags, int startId) {
-      // String wxno1 = intent.getStringExtra("wxno");
-
         handlerAlive.postDelayed(runnableAlive, 20000);//每两秒执行一次runnable.
 
         return START_REDELIVER_INTENT;
@@ -58,13 +59,19 @@ public class LoopService extends Service {
     //是否保活权限
     private static final void permissionAlive() {
         Log.e("LoopService","LoopService");
+        if (isNetWork){
+            //断网刷新第一个图片页面
+            EventBus.getDefault().post("","viewChange");
+        }
         Clients.getInstance().doConnect();
+        isNetWork = false;
     }
 
 
     @Override
     public void onDestroy() {
         Log.e("LoopService","LoopService  --OnDestory");
+        isNetWork=true;
         stopForeground(true);
         handlerAlive.removeCallbacks(runnableAlive);
         Intent intent = new Intent("restartService");

@@ -1,6 +1,11 @@
 package com.lvchuan.ad.netty;
 
+import android.content.Intent;
 import android.util.Log;
+
+import com.lvchuan.ad.service.LoopService;
+
+import org.simple.eventbus.EventBus;
 
 import java.net.URI;
 import java.util.Scanner;
@@ -117,7 +122,9 @@ public class Clients {
             });
 
         }catch (Exception e){
-            Log.e("11",e.getMessage());
+            //发送开启服务
+            EventBus.getDefault().post("1","startService");
+            Log.e("Clients",e.getMessage());
         }
     }
     /**
