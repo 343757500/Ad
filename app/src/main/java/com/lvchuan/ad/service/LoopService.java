@@ -15,7 +15,7 @@ import com.lvchuan.ad.netty.Clients;
 import org.simple.eventbus.EventBus;
 
 public class LoopService extends Service {
-  public  static Handler handlerAlive=new Handler();
+    public  static Handler handlerAlive=new Handler();
    public static Runnable runnableAlive=new Runnable() {
         @Override
         public void run() {

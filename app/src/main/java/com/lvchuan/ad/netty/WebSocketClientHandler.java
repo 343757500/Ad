@@ -1,4 +1,6 @@
 package com.lvchuan.ad.netty;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.lvchuan.ad.bean.NettyCmdBean;
 
@@ -30,13 +32,11 @@ private WebSocketClientHandshaker handshaker;
      */
     private ChannelPromise handshakeFuture;
     boolean flag;
+    private boolean isFalg=true;
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("当前握手的状态"+this.handshaker.isHandshakeComplete());
-        if (this.handshaker.isHandshakeComplete()){
-
-        }
-
         Channel ch = ctx.channel();
         FullHttpResponse response;
         // 进行握手操
@@ -54,6 +54,7 @@ private WebSocketClientHandshaker handshaker;
                 this.handshakeFuture.setFailure(new Exception(errorMsg));
             }
         } else if (msg instanceof FullHttpResponse) {
+            Log.e("WebSocketClientHandler",msg.toString());
             response = (FullHttpResponse)msg;
             throw new IllegalStateException("Unexpected FullHttpResponse (getStatus=" + response.status() + ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
         } else {
@@ -103,9 +104,7 @@ private WebSocketClientHandshaker handshaker;
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("主机关闭"+ctx);
 
-        //StopThread.getInstance().start();
         Clients.getInstance().doConnect();;
-
         //发送开启服务
         EventBus.getDefault().post("1","startService");
 
@@ -155,9 +154,14 @@ private WebSocketClientHandshaker handshaker;
         }
 
         public void run() {
-//            Message message = buildHeartMessage();
-//            System.out.println(new Date()+"Client send heart beat message : ----> " + message);
+
             ctx.writeAndFlush(new TextWebSocketFrame("{\"flag\":\"HeartbeatAndDevice\",\"Heartbeat\":\"ping\"}"));
+            if (isFalg){
+                //netty的发送
+                EventBus.getDefault().post("devId","devId");
+                isFalg=false;
+            }
+
         }
 
         private Message buildHeartMessage() {

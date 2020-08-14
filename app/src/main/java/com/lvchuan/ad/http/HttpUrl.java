@@ -2,6 +2,10 @@ package com.lvchuan.ad.http;
 
 public class HttpUrl {
 
+
+
+    public static final String REGISTER = "/mobile/advertisementMonitor/receiveDevId";
+
     /**
      * 初始化设备id
      */
@@ -12,4 +16,5 @@ public class HttpUrl {
      */
     public static final String STATISTICS="/mobile/advertisementMonitor/znRecycleBoxAnalysis";
 
+    public static final String UPDATE = "/versionControlRecord/validateVersion";
 }

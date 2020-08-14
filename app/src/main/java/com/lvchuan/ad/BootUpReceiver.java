@@ -25,7 +25,7 @@ public class BootUpReceiver extends BroadcastReceiver {
          * 如果 系统 启动的消息，则启动 APP 主页活动
          */
         if (ACTION_BOOT.equals(intent.getAction())) {
-           Intent intentMainActivity = new Intent(context, MainActivity.class);
+           Intent intentMainActivity = new Intent(context, FirstActivity.class);
            intentMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
            context.startActivity(intentMainActivity);
             Toast.makeText(context, "开机完毕~", Toast.LENGTH_LONG).show();

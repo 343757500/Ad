@@ -1,5 +1,6 @@
 package com.lvchuan.ad.view.fragment;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -42,6 +43,17 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     private boolean isTurning;
 
 
+    public   Handler handlerAlive=new Handler();
+    public   Runnable runnableAlive=new Runnable() {
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+            //要做的事情
+            handlerAlive.postDelayed(this, 20000);
+        }
+    };
+
+
     @Override
     public int getLayoutRes() {
         return R.layout.fragment_ad;
@@ -52,7 +64,6 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         EventBus.getDefault().register(this);
         lin_web = findView(R.id.lin_web);
         adBanner = findView(R.id.adBanner);
-
         boolean networkAvailable = NetworkUtil.isNetworkAvailable(getActivity());
         if (!networkAvailable){
             Toast.makeText(getActivity(),"当前网络异常",Toast.LENGTH_LONG).show();
@@ -107,13 +118,25 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         Log.e("AdFragment",curId+"::"+time);
         if (adBanner != null) {
             if (isTurning) {
-                adBanner.postDelayed(() -> {
+             /*   adBanner.postDelayed(() -> {
                     if (curId < bannerList.size() - 1) {
                         if (adBanner != null) adBanner.setCurrentItem(curId + 1, false);
                     } else {
                         if (adBanner != null) adBanner.notifyDataSetChanged();
                     }
+                }, time);*/
+
+                handlerAlive.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (curId < bannerList.size() - 1) {
+                            if (adBanner != null) adBanner.setCurrentItem(curId + 1, false);
+                        } else {
+                            if (adBanner != null) adBanner.notifyDataSetChanged();
+                        }
+                    }
                 }, time);
+
             }
         }
     }
@@ -193,29 +216,31 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         FileUtil fileUtil=new FileUtil(getActivity());
         List<String> filesAllName = getFilesAllName(fileUtil.SDPATH + "AdShow");
         bannerList.clear();
-        for (int i = 0; i < filesAllName.size(); i++) {
-            AdEntity adEntity = new AdEntity();
-            adEntity.setId(i);
-            adEntity.setStatus(1);
-            adEntity.setImgHref(filesAllName.get(i));
-            bannerList.add(adEntity);
-        }
-        adBanner.setPages(new CBViewHolderCreator() {
-            @Override
-            public Holder createHolder(View itemView) {
-                LocalVImageHolderView localImageHolderView = new LocalVImageHolderView(itemView);
-                localImageHolderView.setCallback((curId, time) -> {
-                    handleAdTurn(curId, time);
-                });
-                return localImageHolderView;
+        if (filesAllName!=null) {
+            for (int i = 0; i < filesAllName.size(); i++) {
+                AdEntity adEntity = new AdEntity();
+                adEntity.setId(i);
+                adEntity.setStatus(1);
+                adEntity.setImgHref(filesAllName.get(i));
+                bannerList.add(adEntity);
             }
+            adBanner.setPages(new CBViewHolderCreator() {
+                @Override
+                public Holder createHolder(View itemView) {
+                    LocalVImageHolderView localImageHolderView = new LocalVImageHolderView(itemView);
+                    localImageHolderView.setCallback((curId, time) -> {
+                        handleAdTurn(curId, time);
+                    });
+                    return localImageHolderView;
+                }
 
-            @Override
-            public int getLayoutId() {
-                return R.layout.banner_item;
-            }
-        }, bannerList).setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
-                .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+                @Override
+                public int getLayoutId() {
+                    return R.layout.banner_item;
+                }
+            }, bannerList).setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
+                    .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+        }
     }
 
 

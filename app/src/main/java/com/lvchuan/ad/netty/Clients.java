@@ -3,7 +3,7 @@ package com.lvchuan.ad.netty;
 import android.content.Intent;
 import android.util.Log;
 
-import com.lvchuan.ad.service.LoopService;
+import com.lvchuan.ad.bean.NettyCmdBean;
 
 import org.simple.eventbus.EventBus;
 
@@ -83,13 +83,11 @@ public class Clients {
      */
     public void doConnect() {
         try {
-
             if (channel != null && channel.isActive()){
                 return;
             }
             URI webSocketURI = new URI("ws://192.168.11.130:8095/netty/ws");
             HttpHeaders httpHeaders = new DefaultHttpHeaders();
-
             // 握手
             WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(webSocketURI, WebSocketVersion.V13, (String) null, true, httpHeaders);
             // 连接通道
@@ -101,13 +99,16 @@ public class Clients {
             handshaker.handshake(channel);
             //实现监听通道连接的方法
             connect.addListener(new ChannelFutureListener() {
-
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
 
                     if(channelFuture.isSuccess()){
                         channel = channelFuture.channel();
                         System.out.println("连接服务端成功");
+                        EventBus.getDefault().post("devId","devId");
+                        NettyCmdBean nettyCmdBean = new NettyCmdBean();
+                        nettyCmdBean.setFlag("init");
+                        EventBus.getDefault().post(nettyCmdBean, "nettyCmdBean");
                     }else{
                         System.out.println("每隔2s重连....");
                         channelFuture.channel().eventLoop().schedule(new Runnable() {
@@ -133,7 +134,6 @@ public class Clients {
     public void sendData() {
         Scanner sc= new Scanner(System.in);
         for (int i = 0; i < 1000; i++) {
-
             if(channel != null && channel.isActive()){
                 //获取一个键盘扫描器
                 String nextLine = sc.nextLine();

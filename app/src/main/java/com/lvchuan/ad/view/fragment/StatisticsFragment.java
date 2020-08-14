@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -130,14 +131,20 @@ public class StatisticsFragment extends BaseFragment {
                         @Override
                         public void onSuccess(Response<String> response) {
                             Log.e("StatisticsFragment", response.body());
-                            StatisticsBean statisticsBean = new Gson().fromJson(response.body().toString(), StatisticsBean.class);
-                            List<StatisticsBean.ReturnInfoBean> returnList = statisticsBean.getReturn_info();
-                            List<StatisticsBean.ReturnInfoBean.DataBean> data = returnList.get(0).getData();
-                            tv_name.setText("回收统计数据:"+returnList.get(0).getBoxName());
-                            Message message = Message.obtain();
-                            message.what = 0;
-                            message.obj = data;
-                            mHandler.sendMessage(message);
+                            try {
+                                StatisticsBean statisticsBean = new Gson().fromJson(response.body().toString(), StatisticsBean.class);
+                                List<StatisticsBean.ReturnInfoBean> returnList = statisticsBean.getReturn_info();
+                                List<StatisticsBean.ReturnInfoBean.DataBean> data = returnList.get(0).getData();
+                                tv_name.setText("回收统计数据:"+returnList.get(0).getBoxName());
+                                Message message = Message.obtain();
+                                message.what = 0;
+                                message.obj = data;
+                                mHandler.sendMessage(message);
+                            }catch (Exception e){
+                                Log.e("StatisticsFragment",e.getMessage());
+                                Toast.makeText(getActivity(),"系统异常",Toast.LENGTH_LONG).show();
+                            }
+
                         }
 
                         @Override
@@ -159,36 +166,42 @@ public class StatisticsFragment extends BaseFragment {
 
                     @Override
                     public void onSuccess(Response<String> response) {
-                        Log.e("StatisticsFragment",response.body());
-                        StatisticsBean statisticsBean = new Gson().fromJson(response.body().toString(), StatisticsBean.class);
-                        List<StatisticsBean.ReturnInfoBean> returnList = statisticsBean.getReturn_info();
-                        List<StatisticsBean.ReturnInfoBean.DataBean> data = returnList.get(0).getData();
+                        try {
+                            Log.e("StatisticsFragment",response.body());
+                            StatisticsBean statisticsBean = new Gson().fromJson(response.body().toString(), StatisticsBean.class);
+                            List<StatisticsBean.ReturnInfoBean> returnList = statisticsBean.getReturn_info();
+                            List<StatisticsBean.ReturnInfoBean.DataBean> data = returnList.get(0).getData();
 
-                        for (int i = 0; i < data.size(); i++) {
-                            if (data.get(i).getUnit().equals("个")){
-                                DecimalFormat df = new DecimalFormat("#####0.00");
-                                 weightDouble = data.get(i).getRecycleWeight()*0.005;
-                                 weight = df.format(weightDouble);
-                            }else{
-                                 weight=data.get(i).getRecycleWeight()+"";
-                                weightDouble=data.get(i).getRecycleWeight();
+                            for (int i = 0; i < data.size(); i++) {
+                                if (data.get(i).getUnit().equals("个")){
+                                    DecimalFormat df = new DecimalFormat("#####0.00");
+                                    weightDouble = data.get(i).getRecycleWeight()*0.005;
+                                    weight = df.format(weightDouble);
+                                }else{
+                                    weight=data.get(i).getRecycleWeight()+"";
+                                    weightDouble=data.get(i).getRecycleWeight();
+                                }
+                                configs.startAngle(-90)// 起始角度偏移
+                                        .addData(new SimplePieInfo(weightDouble, ContextCompat.getColor(getActivity(),colorList[i]), data.get(i).getRecycleName()+weight+"(kg)"))//数据（实现IPieInfo接口的bean）
+                                        .duration(0)
+                                        .setTextSize(50)
+                                        .strokeMode(false)
+                                        .pieRadius(300)
+                                        .drawText(true);// 持续时间
+
+                                mAnimatedPieView.applyConfig(configs);
+                                mAnimatedPieView.start();
                             }
-                            configs.startAngle(-90)// 起始角度偏移
-                                    .addData(new SimplePieInfo(weightDouble, ContextCompat.getColor(getActivity(),colorList[i]), data.get(i).getRecycleName()+weight+"(kg)"))//数据（实现IPieInfo接口的bean）
-                                    .duration(0)
-                                    .setTextSize(50)
-                                    .strokeMode(false)
-                                    .pieRadius(300)
-                                    .drawText(true);// 持续时间
-
-                            mAnimatedPieView.applyConfig(configs);
-                            mAnimatedPieView.start();
-                        }
-        // 以下两句可以直接用 mAnimatedPieView.start(config); 解决，功能一致
+                            // 以下两句可以直接用 mAnimatedPieView.start(config); 解决，功能一致
                        /* Message message = Message.obtain();
                         message.what = 1;
                         mHandler.sendMessage(message);*/
-                        //dailyColorAdapter.setDatas(data);
+                            //dailyColorAdapter.setDatas(data);
+                        }catch (Exception e){
+                            Log.e("StatisticsFragment",e.getMessage());
+                            Toast.makeText(getActivity(),"系统异常",Toast.LENGTH_LONG).show();
+                        }
+
                     }
 
                     @Override
