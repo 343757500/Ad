@@ -25,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".ClientApplication">
-        <activity android:name=".FirstActivity"
+        <activity android:name=".view.activity.FirstActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <intent-filter>
@@ -52,6 +52,12 @@
 
 
         <service android:enabled="true" android:name=".service.LoopService">
+            <intent-filter>
+                <action android:name="org.allin.android.musicService" />
+            </intent-filter>
+        </service>
+
+        <service android:enabled="true" android:name=".service.UpPictureService">
             <intent-filter>
                 <action android:name="org.allin.android.musicService" />
             </intent-filter>

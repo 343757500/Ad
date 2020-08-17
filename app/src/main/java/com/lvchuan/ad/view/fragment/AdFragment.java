@@ -1,9 +1,11 @@
 package com.lvchuan.ad.view.fragment;
 
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bigkoo.convenientbanner.ConvenientBanner;
@@ -36,13 +38,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdFragment extends BaseFragment implements View.OnClickListener , OnItemClickListener {
-    private AgentWeb agentWeb;
-    private LinearLayout lin_web;
     private ConvenientBanner adBanner;
     List<AdEntity> bannerList = new ArrayList<>();
     private boolean isTurning;
 
 
+    private int curId=0;
     public   Handler handlerAlive=new Handler();
     public   Runnable runnableAlive=new Runnable() {
         @Override
@@ -50,8 +51,15 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
             // TODO Auto-generated method stub
             //要做的事情
             handlerAlive.postDelayed(this, 20000);
+
+            if (curId < bannerList.size() - 1) {
+                if (adBanner != null) adBanner.setCurrentItem(curId + 1, false);
+            } else {
+                if (adBanner != null) adBanner.notifyDataSetChanged();
+            }
         }
     };
+    private RelativeLayout rr_ad;
 
 
     @Override
@@ -62,8 +70,8 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     @Override
     public void initView() {
         EventBus.getDefault().register(this);
-        lin_web = findView(R.id.lin_web);
         adBanner = findView(R.id.adBanner);
+        rr_ad = findView(R.id.rr_ad);
         boolean networkAvailable = NetworkUtil.isNetworkAvailable(getActivity());
         if (!networkAvailable){
             Toast.makeText(getActivity(),"当前网络异常",Toast.LENGTH_LONG).show();
@@ -77,6 +85,8 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                 adEntity.setImgHref(filesAllName.get(i));
                 bannerList.add(adEntity);
             }
+            rr_ad.setVisibility(View.GONE);
+            adBanner.setVisibility(View.VISIBLE);
             adBanner.setPages(new CBViewHolderCreator() {
                 @Override
                 public Holder createHolder(View itemView) {
@@ -116,6 +126,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
 
     private void handleAdTurn(int curId, long time) {
         Log.e("AdFragment",curId+"::"+time);
+        handlerAlive.removeCallbacks(runnableAlive);
         if (adBanner != null) {
             if (isTurning) {
              /*   adBanner.postDelayed(() -> {
@@ -126,7 +137,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                     }
                 }, time);*/
 
-                handlerAlive.postDelayed(new Runnable() {
+            /*    handlerAlive.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (curId < bannerList.size() - 1) {
@@ -135,7 +146,10 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                             if (adBanner != null) adBanner.notifyDataSetChanged();
                         }
                     }
-                }, time);
+                }, time);*/
+
+                this.curId=curId;
+                handlerAlive.postDelayed(runnableAlive,time);
 
             }
         }
@@ -174,7 +188,13 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     //接收activity传过来的数据展示广播
     @Subscriber(tag = "initBean")
     private void initBean(InitBean initBean) {
+
+        rr_ad.setVisibility(View.GONE);
+        adBanner.setVisibility(View.VISIBLE);
+
+
         bannerList.clear();
+        handlerAlive.removeCallbacks(runnableAlive);
         if ("1".equals(initBean.getReturn_info().get(0).getMode())) {
             List<InitBean.ReturnInfoBean.AdvertisementBean> advertisement = initBean.getReturn_info().get(0).getAdvertisement();
 
@@ -213,9 +233,13 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     //接收activity传过来的数据展示广播
     @Subscriber(tag = "initNotBean")
     private void initNotBean(String message) {
+        rr_ad.setVisibility(View.GONE);
+        adBanner.setVisibility(View.VISIBLE);
+
         FileUtil fileUtil=new FileUtil(getActivity());
         List<String> filesAllName = getFilesAllName(fileUtil.SDPATH + "AdShow");
         bannerList.clear();
+        handlerAlive.removeCallbacks(runnableAlive);
         if (filesAllName!=null) {
             for (int i = 0; i < filesAllName.size(); i++) {
                 AdEntity adEntity = new AdEntity();
@@ -257,17 +281,6 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         EventBus.getDefault().unregister(this);
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.bt_1:
-                EventBus.getDefault().post("0","handlecmd");
-                break;
-            case R.id.bt_2:
-                EventBus.getDefault().post("1","handlecmd");
-                break;
-        }
-    }
 
 
     public String mSaveFolder = FileDownloadUtils.getDefaultSaveRootPath()+File.separator+"feifei_save";

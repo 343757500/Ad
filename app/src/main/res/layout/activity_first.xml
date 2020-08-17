@@ -2,8 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:layout_height="match_parent">
 
       <com.lvchuan.ad.view.NoScrollViewPager
           android:visibility="visible"

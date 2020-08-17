@@ -38,7 +38,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
             <RelativeLayout
-                android:padding="5dp"
                 android:background="@mipmap/rv_bg"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -80,7 +79,6 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:layout_below="@+id/tv_count"
-                    android:padding="5dp"
                     android:id="@+id/rv"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"></androidx.recyclerview.widget.RecyclerView>
@@ -88,7 +86,6 @@
 
 
             <RelativeLayout
-               android:layout_marginLeft="10dp"
                 android:background="@mipmap/rv_bg"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
