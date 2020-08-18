@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -344,7 +345,21 @@ public class FirstActivity extends BaseActivity {
             sendDevId(SharedPreUtil.getString(FirstActivity.this,"devId",""));
         }else if("update".equals(nettyCmdBean.getFlag())){
             checkVersion();
+        }else if ("restart".equals(nettyCmdBean.getFlag())){
+            Log.e("nettyCmdBean","重启 广播：："+new Gson().toJson(nettyCmdBean));
+            restartApp();
         }
+    }
+
+
+
+    public void restartApp() {
+        // 重启应用
+        SystemClock.sleep(500);
+        Intent intent = new Intent(this, FirstActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(intent);
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
 
