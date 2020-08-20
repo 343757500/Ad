@@ -26,6 +26,7 @@ import com.lvchuan.ad.base.BaseFragment;
 import com.lvchuan.ad.bean.AdEntity;
 import com.lvchuan.ad.bean.InitBean;
 import com.lvchuan.ad.bean.NettyCmdBean;
+import com.lvchuan.ad.transformer.DepthPageTransformer;
 import com.lvchuan.ad.utils.FileUtil;
 import com.lvchuan.ad.utils.NetworkUtil;
 
@@ -222,6 +223,8 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                 }
             }, bannerList).setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
                     .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+
+            //adBanner.getViewPager(). viewPager.setPageTransformer(true, new DepthPageTransformer());
 
             //下载资源到本地，没有网络的情况下显示
             initDownLoad();

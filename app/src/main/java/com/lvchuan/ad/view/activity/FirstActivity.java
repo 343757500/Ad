@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -41,6 +43,8 @@ import com.lvchuan.ad.http.HttpUrl;
 import com.lvchuan.ad.netty.Clients;
 import com.lvchuan.ad.service.LoopService;
 import com.lvchuan.ad.service.UpPictureService;
+import com.lvchuan.ad.transformer.DepthPageTransformer;
+import com.lvchuan.ad.transformer.ZoomOutPageTransformer;
 import com.lvchuan.ad.utils.OkGoUpdateHttpUtil;
 import com.lvchuan.ad.utils.PackageUtils;
 import com.lvchuan.ad.utils.SharedPreUtil;
@@ -114,7 +118,7 @@ public class FirstActivity extends BaseActivity {
         initViewPager();
 
 
-        //getGps();
+        getGps();
 
     }
 
@@ -126,7 +130,7 @@ public class FirstActivity extends BaseActivity {
     }
 
     private void initRegister() {
-        String sendId =BaseUrl.BASE_URL+ HttpUrl.REGISTER;
+        String sendId = BaseUrl.BASE_URL + HttpUrl.REGISTER;
         String devId = SharedPreUtil.getString(FirstActivity.this, "devId", "");
         OkGo.<String>get(sendId)
                 .params("devId", devId)
@@ -148,9 +152,8 @@ public class FirstActivity extends BaseActivity {
 
 
     private void getGps() {
-        getLocation();
-    }
 
+    }
 
 
     @SuppressLint("CheckResult")
@@ -166,9 +169,9 @@ public class FirstActivity extends BaseActivity {
                         Manifest.permission.ACCESS_COARSE_LOCATION)
                 .subscribe(aBoolean -> {
                     if (aBoolean) {
-                        Log.e("111","获得权限成功");
+                        Log.e("111", "获得权限成功");
                         String devId = RxDeviceTool.getDeviceIdIMEI(this);
-                        SharedPreUtil.saveString(this,"devId",devId);
+                        SharedPreUtil.saveString(this, "devId", devId);
 
                         //启动netty服务
                         Clients.getInstance().start();
@@ -176,9 +179,9 @@ public class FirstActivity extends BaseActivity {
                         initRegister();
                         //检测是否需要更新apk
                         checkVersion();
-                        Log.e("devId",devId);
+                        Log.e("devId", devId);
 
-                       /* Intent intentFour = new Intent(this, UpPictureService.class);
+                     /*   Intent intentFour = new Intent(this, UpPictureService.class);
                         startService(intentFour);*/
 
                     } else {
@@ -186,7 +189,6 @@ public class FirstActivity extends BaseActivity {
                     }
                 });
     }
-
 
 
     @Override
@@ -199,15 +201,12 @@ public class FirstActivity extends BaseActivity {
     }
 
 
-
-
-
     @Override
     public void onClick(View v, int id) {
-        if (id==R.id.tv_config_or_get_ad){
+        if (id == R.id.tv_config_or_get_ad) {
             ConfigInputFragment.showDialog(this, (config) -> {
-               // getAdByConfig(config, true);
-                if (config.equals("123456&1")){
+                // getAdByConfig(config, true);
+                if (config.equals("123456&1")) {
                     viewPager.setVisibility(View.VISIBLE);
                     ll_setting.setVisibility(View.GONE);
                 }
@@ -216,20 +215,21 @@ public class FirstActivity extends BaseActivity {
     }
 
 
-
     private void initViewPager() {
-        AdFragment adFragment= new AdFragment();
-        StatisticsFragment statisticsFragment= new StatisticsFragment();
+        AdFragment adFragment = new AdFragment();
+        StatisticsFragment statisticsFragment = new StatisticsFragment();
         H5ViewFragment h5ViewFragment = new H5ViewFragment();
         List<Fragment> fragments = new ArrayList<>();
         fragments.add(adFragment);
         fragments.add(statisticsFragment);
         fragments.add(h5ViewFragment);
-        MyFragmentAdapter  myFragmentAdapter = new MyFragmentAdapter(
+        MyFragmentAdapter myFragmentAdapter = new MyFragmentAdapter(
                 getSupportFragmentManager(), fragments);
         viewPager.setAdapter(myFragmentAdapter);
+        viewPager.setPageTransformer(true, new DepthPageTransformer());
         viewPager.setOffscreenPageLimit(fragments.size()); //预加载
-        viewPager.setCurrentItem(0, false);
+        viewPager.setCurrentItem(0, true);
+
     }
 
 
@@ -244,7 +244,7 @@ public class FirstActivity extends BaseActivity {
 
     // 发送设备Id到服务器
     private void sendDevId(String devId) {
-        String sendId =BaseUrl.BASE_URL+ HttpUrl.INIT;
+        String sendId = BaseUrl.BASE_URL + HttpUrl.INIT;
         OkGo.<String>get(sendId)
                 .params("devId", devId)
                 .execute(new StringCallback() {
@@ -255,18 +255,18 @@ public class FirstActivity extends BaseActivity {
                             if (initJson.contains("true")) {
                                 InitBean initBean = new Gson().fromJson(initJson, InitBean.class);
                                 String mode = initBean.getReturn_info().get(0).getMode();
-                                viewPager.setCurrentItem(Integer.parseInt(mode) - 1, false);
-                                Log.e("FirstActivity","发送广播"+new Gson().toJson(initBean));
+                                viewPager.setCurrentItem(Integer.parseInt(mode) - 1, true);
+                                Log.e("FirstActivity", "发送广播" + new Gson().toJson(initBean));
                                 EventBus.getDefault().post(initBean, "initBean");
-                            }else{
-                                viewPager.setCurrentItem(0, false);
+                            } else {
+                                viewPager.setCurrentItem(0, true);
                                 EventBus.getDefault().post("", "initNotBean");
                                 EorrBean eorrBean = new Gson().fromJson(initJson, EorrBean.class);
-                                Toast.makeText(FirstActivity.this,eorrBean.getCommon_return()+"",Toast.LENGTH_LONG).show();
+                                Toast.makeText(FirstActivity.this, eorrBean.getCommon_return() + "", Toast.LENGTH_LONG).show();
                             }
-                        }catch (Exception e){
-                            Log.e("FirstActivity",e.getMessage());
-                            Toast.makeText(FirstActivity.this,"系统异常",Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            Log.e("FirstActivity", e.getMessage());
+                            Toast.makeText(FirstActivity.this, "系统异常", Toast.LENGTH_LONG).show();
                         }
 
                     }
@@ -279,22 +279,17 @@ public class FirstActivity extends BaseActivity {
     }
 
 
-
-
-
-
-
     @Subscriber(tag = "startService")
     private void setService(String staues) {
 
-        if ("1".equals(staues)){
+        if ("1".equals(staues)) {
             boolean serviceRunning = isServiceRunning("com.lvchuan.ad.service.LoopService");
-            if (serviceRunning){
+            if (serviceRunning) {
                 return;
             }
             Intent intentFour = new Intent(this, LoopService.class);
             startService(intentFour);
-        }else{
+        } else {
             Intent intentFour = new Intent(this, LoopService.class);
             stopService(intentFour);
         }
@@ -316,41 +311,39 @@ public class FirstActivity extends BaseActivity {
     }
 
 
-
     @Subscriber(tag = "devId")
     private void postDevId(String devIds) {
         try {
-            String devId= SharedPreUtil.getString(FirstActivity.this,"devId","");
+            String devId = SharedPreUtil.getString(FirstActivity.this, "devId", "");
             if (!"".equals(devId)) {
                 Channel channel = Clients.channel;
                 TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame("{\"flag\":\"BindAndroidChannelAndDevice\",\"devId\":\"" + devId + "\"}");
                 channel.writeAndFlush(textWebSocketFrame);
             }
-        }catch (Exception e){
-            Log.e(TAG,e.getMessage());
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
 
     }
 
     @Subscriber(tag = "viewChange")
     private void viewChange(String devIds) {
-        viewPager.setCurrentItem(0, false);
+        viewPager.setCurrentItem(0, true);
     }
 
 
     @Subscriber(tag = "nettyCmdBean")
     private void nettyCmdBean(NettyCmdBean nettyCmdBean) {
-        Log.e("nettyCmdBean","广播：："+new Gson().toJson(nettyCmdBean));
-        if ("init".equals(nettyCmdBean.getFlag())){
-            sendDevId(SharedPreUtil.getString(FirstActivity.this,"devId",""));
-        }else if("update".equals(nettyCmdBean.getFlag())){
+        Log.e("nettyCmdBean", "广播：：" + new Gson().toJson(nettyCmdBean));
+        if ("init".equals(nettyCmdBean.getFlag())) {
+            sendDevId(SharedPreUtil.getString(FirstActivity.this, "devId", ""));
+        } else if ("update".equals(nettyCmdBean.getFlag())) {
             checkVersion();
-        }else if ("restart".equals(nettyCmdBean.getFlag())){
-            Log.e("nettyCmdBean","重启 广播：："+new Gson().toJson(nettyCmdBean));
+        } else if ("restart".equals(nettyCmdBean.getFlag())) {
+            Log.e("nettyCmdBean", "重启 广播：：" + new Gson().toJson(nettyCmdBean));
             restartApp();
         }
     }
-
 
 
     public void restartApp() {
@@ -362,107 +355,6 @@ public class FirstActivity extends BaseActivity {
         android.os.Process.killProcess(android.os.Process.myPid());
     }
 
-
-    public static final int LOCATION_CODE = 301;
-    private void getLocation () {
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        //获取所有可用的位置提供器
-        List<String> providers = locationManager.getProviders(true);
-        if (providers.contains(LocationManager.GPS_PROVIDER)) {
-            //如果是GPS
-            locationProvider = LocationManager.GPS_PROVIDER;
-        } else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
-            //如果是Network
-            locationProvider = LocationManager.NETWORK_PROVIDER;
-        } else {
-            Intent i = new Intent();
-            i.setAction(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(i);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //获取权限（如果没有开启权限，会弹出对话框，询问是否开启权限）
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                //请求权限
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_CODE);
-            } else {
-                //监视地理位置变化
-                locationManager.requestLocationUpdates(locationProvider, 3000, 1, locationListener);
-                Location location = locationManager.getLastKnownLocation(locationProvider);
-                Log.e("111","---"+location);
-                if (location != null) {
-                    //输入经纬度
-                    Toast.makeText(this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else {
-            //监视地理位置变化
-            locationManager.requestLocationUpdates(locationProvider, 3000, 1, locationListener);
-            Location location = locationManager.getLastKnownLocation(locationProvider);
-            if (location != null) {
-                //不为空,显示地理位置经纬度
-                Toast.makeText(this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    public LocationListener locationListener = new LocationListener() {
-        // Provider的状态在可用、暂时不可用和无服务三个状态直接切换时触发此函数
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-        // Provider被enable时触发此函数，比如GPS被打开
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-        // Provider被disable时触发此函数，比如GPS被关闭
-        @Override
-        public void onProviderDisabled(String provider) {
-        }
-        //当坐标改变时触发此函数，如果Provider传进相同的坐标，它就不会被触发
-        @Override
-        public void onLocationChanged(Location location) {
-            if (location != null) {
-                //不为空,显示地理位置经纬度
-                Toast.makeText(FirstActivity.this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
-            }
-        }
-    };
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case LOCATION_CODE:
-                if(grantResults.length > 0 && grantResults[0] == getPackageManager().PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "申请权限", Toast.LENGTH_LONG).show();
-                    try {
-                        List<String> providers = locationManager.getProviders(true);
-                        if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
-                            //如果是Network
-                            locationProvider = LocationManager.NETWORK_PROVIDER;
-                        }else if (providers.contains(LocationManager.GPS_PROVIDER)) {
-                            //如果是GPS
-                            locationProvider = LocationManager.GPS_PROVIDER;
-                        }
-                        //监视地理位置变化
-                        locationManager.requestLocationUpdates(locationProvider, 3000, 1, locationListener);
-                        Location location = locationManager.getLastKnownLocation(locationProvider);
-                        if (location != null) {
-                            //不为空,显示地理位置经纬度
-                            Toast.makeText(this, location.getLongitude() + " " + location.getLatitude() + "", Toast.LENGTH_SHORT).show();
-                        }
-                    }catch (SecurityException e){
-                        e.printStackTrace();
-                    }
-                } else {
-                    Toast.makeText(this, "缺少权限", Toast.LENGTH_LONG).show();
-                    finish();
-                }
-                break;
-        }
-    }
 
 
     @Override

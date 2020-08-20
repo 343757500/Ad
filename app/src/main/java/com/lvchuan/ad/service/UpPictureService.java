@@ -66,8 +66,6 @@ public class UpPictureService extends Service {
             File adShow = fileUtil.createSDDir("UpPicture");
             if (fileUtil.isFileExist("UpPicture")) {
                 screenShotByReflect(fileUtil.SDCardPath()+"UpPicture/a.jpg");
-                Process exec = Runtime.getRuntime().exec("su adb pull /sdcard/screenshot.jpg");
-                byte[] screenCapBytes = ScreenCaptureUtil.getInstance().getScreenCapBytes();
             }
 
         }catch (Exception e){
@@ -78,7 +76,7 @@ public class UpPictureService extends Service {
 
     //截屏
     public static void screenShotByReflect(String filePath){
-        String shotCmd = "screencap -p " + filePath + " \n";
+        String shotCmd = "screencap -p " + filePath;
         try {
             Runtime.getRuntime().exec(shotCmd);
             Log.e("UpPcitureService","截图成功");
