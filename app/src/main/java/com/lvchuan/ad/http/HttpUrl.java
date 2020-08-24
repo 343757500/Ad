@@ -16,5 +16,8 @@ public class HttpUrl {
      */
     public static final String STATISTICS="/mobile/advertisementMonitor/znRecycleBoxAnalysis";
 
-    public static final String UPDATE = "/versionControlRecord/validateVersion";
+    /**
+     * 版本更新接口
+     */
+    public static final String UPDATE = "/mobile/version/validateVersion";
 }
