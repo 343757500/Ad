@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bigkoo.convenientbanner.ConvenientBanner;
@@ -32,6 +33,7 @@ import com.lvchuan.ad.utils.NetworkUtil;
 
 import org.simple.eventbus.EventBus;
 import org.simple.eventbus.Subscriber;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +63,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         }
     };
     private RelativeLayout rr_ad;
+    private TextView tv_init;
 
 
     @Override
@@ -73,6 +76,7 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
         EventBus.getDefault().register(this);
         adBanner = findView(R.id.adBanner);
         rr_ad = findView(R.id.rr_ad);
+        tv_init = findView(R.id.tv_init);
         boolean networkAvailable = NetworkUtil.isNetworkAvailable(getActivity());
         if (!networkAvailable){
             Toast.makeText(getActivity(),"当前网络异常",Toast.LENGTH_LONG).show();
@@ -236,14 +240,13 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
     //接收activity传过来的数据展示广播
     @Subscriber(tag = "initNotBean")
     private void initNotBean(String message) {
-        rr_ad.setVisibility(View.GONE);
-        adBanner.setVisibility(View.VISIBLE);
-
         FileUtil fileUtil=new FileUtil(getActivity());
         List<String> filesAllName = getFilesAllName(fileUtil.SDPATH + "AdShow");
         bannerList.clear();
         handlerAlive.removeCallbacks(runnableAlive);
         if (filesAllName!=null) {
+            rr_ad.setVisibility(View.GONE);
+            adBanner.setVisibility(View.VISIBLE);
             for (int i = 0; i < filesAllName.size(); i++) {
                 AdEntity adEntity = new AdEntity();
                 adEntity.setId(i);
@@ -267,6 +270,11 @@ public class AdFragment extends BaseFragment implements View.OnClickListener , O
                 }
             }, bannerList).setPageIndicatorAlign(ConvenientBanner.PageIndicatorAlign.CENTER_HORIZONTAL)
                     .setPointViewVisible(true).setCanLoop(true).setOnItemClickListener(this);
+        }else{
+            rr_ad.setVisibility(View.VISIBLE);
+            adBanner.setVisibility(View.GONE);
+            tv_init.setText(message);
+            Log.e("AdFragment","请先配置设备");
         }
     }
 

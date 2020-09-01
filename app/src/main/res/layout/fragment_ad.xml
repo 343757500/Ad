@@ -24,6 +24,7 @@
         android:layout_height="match_parent">
 
         <TextView
+            android:id="@+id/tv_init"
             android:layout_centerInParent="true"
             android:text="初始化设备中....."
             android:layout_width="wrap_content"

@@ -86,7 +86,9 @@ public class Clients {
             if (channel != null && channel.isActive()){
                 return;
             }
-            URI webSocketURI = new URI("ws://192.168.11.130:8095/netty/ws");
+
+            URI webSocketURI = new URI("ws://120.78.175.246:8095/netty/ws");
+            //URI webSocketURI = new URI("ws://192.168.11.130:8095/netty/ws");
             HttpHeaders httpHeaders = new DefaultHttpHeaders();
             // 握手
             WebSocketClientHandshaker handshaker = WebSocketClientHandshakerFactory.newHandshaker(webSocketURI, WebSocketVersion.V13, (String) null, true, httpHeaders);

@@ -260,8 +260,9 @@ public class FirstActivity extends BaseActivity {
                                 EventBus.getDefault().post(initBean, "initBean");
                             } else {
                                 viewPager.setCurrentItem(0, true);
-                                EventBus.getDefault().post("", "initNotBean");
+
                                 EorrBean eorrBean = new Gson().fromJson(initJson, EorrBean.class);
+                                EventBus.getDefault().post(eorrBean.getCommon_return() + "", "initNotBean");
                                 Toast.makeText(FirstActivity.this, eorrBean.getCommon_return() + "", Toast.LENGTH_LONG).show();
                             }
                         } catch (Exception e) {

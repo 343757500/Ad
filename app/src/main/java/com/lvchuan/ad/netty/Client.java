@@ -30,7 +30,8 @@ import io.netty.handler.timeout.IdleStateHandler;
 
 public class Client extends Thread {
 
-     static String host = "ws://192.168.11.130:8095/recycle-box/webSocket";
+     //static String host = "ws://192.168.11.130:8095/recycle-box/webSocket";
+    static String host = "ws://120.78.175.246:8095/netty/ws";
 //    public static String host = "192.168.31.202";
 //121 130 202
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
